@@ -821,57 +821,69 @@ op_adda_size_long:
 op_asx_ea:
     MOVE.B #'A', (A2)+
     MOVE.B #'S', (A2)+
-    
-    MOVE.W  (A0), D5
-    LSR.W   #8, D5
-    BCS     op_asl_reg
-    MOVE.B  #'R', (A2)+
-    BRA     op_asx_ea_continue
-op_asl_ea:
-    MOVE.B  #'L', (A2)+
-op_asx_ea_continue:
-    MOVE.B  (A0), D1
-    JSR     ea_start
-    JMP     op_finish
+    BRA     op_shift_ea
 
 op_asx_reg:
     MOVE.B #'A', (A2)+
     MOVE.B #'S', (A2)+
+    BRA     op_shift_reg
     
+op_lsx_reg:
+    MOVE.B #'L', (A2)+
+    MOVE.B #'S', (A2)+
+    BRA     op_shift_reg
+
+op_lsx_ea:
+    MOVE.B #'L', (A2)+
+    MOVE.B #'S', (A2)+
+    BRA     op_shift_ea
+
+op_rox_reg:
+    MOVE.B #'R', (A2)+
+    MOVE.B #'O', (A2)+
+    BRA     op_shift_reg
+
+op_rox_ea:
+    MOVE.B #'R', (A2)+
+    MOVE.B #'O', (A2)+
+    BRA     op_shift_ea
+
+op_shift_ea:
     MOVE.W  (A0), D5
     LSR.W   #8, D5
-    BCS     op_asl_reg
+    BCS     op_shift_left_ea
     MOVE.B  #'R', (A2)+
-    BRA     op_asx_ea_continue
-op_asl_reg:
+    BRA     op_shift_ea_continue
+op_shift_left_ea:
     MOVE.B  #'L', (A2)+
-op_asx_reg_continue:
+op_shift_ea_continue:
+    MOVE.B  (A0), D1
+    JSR     ea_start
+    JMP     op_finish
+
+op_shift_reg:
+    MOVE.W  (A0), D5
+    LSR.W   #8, D5
+    BCS     op_shift_reg
+    MOVE.B  #'R', (A2)+
+    BRA     op_shift_reg_continue
+op_shift_reg:
+    MOVE.B  #'L', (A2)+
+op_shift_reg_continue:
     MOVE.W  (A0), D3
     LSR.W   #6, D3
     MOVE.B  #' ', (A2)+
     JSR     light_purple_sizing
-    BCS     op_asx_mode_reg
+    BCS     op_shift_mode_reg
     MOVE.B  '#'
-    BRA     op_asx_mode_continue
-op_asx_mode_reg:
+    BRA     op_shift_mode_continue
+op_shift_mode_reg:
     MOVE.B  #'D', (A2)+
-op_asx_mode_continue:
+op_shift_mode_continue:
     CLR.L   D3
     MOVE.B  (A0), D3
     JSR     int_to_ascii
     JMP     op_finish
-    
-op_lsx_reg:
-    JMP     op_finish
-
-op_lsx_ea:
-    JMP     op_finish
-
-op_rox_reg:
-    JMP     op_finish
-
-op_rox_ea:
-    JMP     op_finis
 
 op_finish:
     MOVE.B #0, (A2)+
@@ -921,6 +933,7 @@ end:
 
     SIMHALT             ; halt simulator
     END    START        ; last line of source
+
 
 
 
