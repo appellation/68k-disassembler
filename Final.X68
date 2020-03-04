@@ -232,18 +232,29 @@ code1101:
     BRA     op_adda
 
 code1110:
-    MOVE.W (A0), D5
-    LSR.W #7, D5
-    BCC    op_rox
-    LSR.W #1, D5
-    BCC     op_rox
-    LSR.W #1, D5
-    CMPI.B #$70, D5
+    MOVE.W  (A0), D5
+    LSR.W   #7, D5
+    BCC     code_shift_reg
+    LSR.W   #1, D5
+    BCC     code_shift_reg
+    BRA     code_shift_ea
     
     
+code_shift_reg:
+    MOVE.W  (A0), D5
+    LSR.W   #4, D5
+    BCC     op_asx_reg
+    LSR.W   #1, D5
+    BCC     op_lsx_reg
+    BRA     op_rox_reg
     
-    
-
+code_shift_ea:
+    MOVE.W  (A0), D5
+    LSL.W   #6, D5
+    BCS     op_rox_ea
+    LSL.W   #1, D5
+    BCS     op_lsx_ea
+    BRA     op_asx_ea
 
 ********************************************
 *                 OP 0000                  *
@@ -807,19 +818,60 @@ op_adda_size_long:
 ********************************************
 *                 OP 1110                  *
 ********************************************
-op_asl:
+op_asx_ea:
+    MOVE.B #'A', (A2)+
+    MOVE.B #'S', (A2)+
+    
+    MOVE.W  (A0), D5
+    LSR.W   #8, D5
+    BCS     op_asl_reg
+    MOVE.B  #'R', (A2)+
+    BRA     op_asx_ea_continue
+op_asl_ea:
+    MOVE.B  #'L', (A2)+
+op_asx_ea_continue:
+    MOVE.B  (A0), D1
+    JSR     ea_start
+    JMP     op_finish
 
-op_asr:
+op_asx_reg:
+    MOVE.B #'A', (A2)+
+    MOVE.B #'S', (A2)+
+    
+    MOVE.W  (A0), D5
+    LSR.W   #8, D5
+    BCS     op_asl_reg
+    MOVE.B  #'R', (A2)+
+    BRA     op_asx_ea_continue
+op_asl_reg:
+    MOVE.B  #'L', (A2)+
+op_asx_reg_continue:
+    MOVE.W  (A0), D3
+    LSR.W   #6, D3
+    MOVE.B  #' ', (A2)+
+    JSR     light_purple_sizing
+    BCS     op_asx_mode_reg
+    MOVE.B  '#'
+    BRA     op_asx_mode_continue
+op_asx_mode_reg:
+    MOVE.B  #'D', (A2)+
+op_asx_mode_continue:
+    CLR.L   D3
+    MOVE.B  (A0), D3
+    JSR     int_to_ascii
+    JMP     op_finish
+    
+op_lsx_reg:
+    JMP     op_finish
 
-op_lsl:
+op_lsx_ea:
+    JMP     op_finish
 
-op_lsr:
+op_rox_reg:
+    JMP     op_finish
 
-op_rol:
-
-op_ror:
-
-op_rox:
+op_rox_ea:
+    JMP     op_finis
 
 op_finish:
     MOVE.B #0, (A2)+
@@ -832,7 +884,7 @@ op_unsupported:
 
 int_to_ascii:
     CLR.L   D5
-   MOVE.B #'$', (A2)+
+    MOVE.B #'$', (A2)+
     ;ROL.L   #1, D3
    ; BCS     itoa_negative
 ;itoa_buffer:
@@ -869,6 +921,8 @@ end:
 
     SIMHALT             ; halt simulator
     END    START        ; last line of source
+
+
 
 
 
