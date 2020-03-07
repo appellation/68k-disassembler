@@ -1,3 +1,4 @@
+
 *-----------------------------------------------------------
 * Title      : CSS422 - Disassembler
 * Written by : Derek Bui & Will Nelson
@@ -9,6 +10,7 @@ START:                  ; first instruction of program
 
 * Put program code here
     LEA $400, A0
+op_start:
     MOVE.L (A0), D2
     LSR.L #8, D2
     LSR.L #8, D2
@@ -43,14 +45,119 @@ START:                  ; first instruction of program
     CMPI.B  #$E, D2
     BEQ     code1110
     BRA op_unsupported
+********************************************
+*          PROGRAM COUNTER                 *
+********************************************
+
 
 ********************************************
 *                 EA START                 *
 ********************************************
 
 ea_start:
-    * PUT EFFECTIVE ADDRESSING HERE
+    MOVE.W D1, D4
+    LSR     #3, D4
+    ANDI    #7, D4
+    CMPI.B  #0, D4
+    JMP ea_data_register
+    CMPI.B  #1, D4
+    JMP ea_address_register
+    CMPI.B  #2, D4
+    JMP ea_address
+    CMPI.B  #3, D4
+    JMP ea_address_post_increment
+    CMPI.B  #4, D4
+    JMP ea_address_pre_decremenet
+    CMPI.B  #5, D4
+    JMP ea_address_displacement
+    CMPI.B  #6, D4
+    JMP ea_address_index
+    CMPI.B  #7, D4
+    JMP ea_mode_seven
+
+ea_immediate_start:
+    MOVE.B  #'.', (A2)+
+    MOVE.B  D1, D3
+    LSR     #7, D3
+    BCS     ea_immediate_size_w
+    LSR     #1, D3
+    BCS     ea_immediate_size_l
+    BRA     ea_immediate_size_b
+
+ea_immediate_size_b:
+    MOVE.B  #'B', (A2)+
+    MOVE.B  #' ', (A2)+
+    BRA     ea_byte_immediate
+    JMP     ea_start
+
+ea_immediate_size_w:
+    MOVE.B  #'W', (A2)+
+    MOVE.B  #' ', (A2)+
+    BRA     ea_word_immediate
+    JMP     ea_start
+
+ea_immediate_size_l:
+    MOVE.B  #'L', (A2)+
+    MOVE.B #' ', (A2)+
+    BRA     ea_long_immediate
+    JMP     ea_start
+
+
+ea_address_post_increment:
+ea_address_pre_decremenet:
+ea_address_displacement:
+ea_address_index:
+ea_mode_seven:
+
+ea_long_immediate:
+    ADDA    #2, A0
+    MOVE.L  (A0), D3
+    MOVE.B  #'#', (A2)+
+    JSR int_to_ascii
+    ADDA    #4, A0
     RTS
+
+ea_byte_immediate:
+ea_word_immediate:
+    ADDA    #2, A0
+    MOVE.W  (A0), D3
+    MOVE.B  #'#', (A2)+
+    JSR int_to_ascii
+    ADDA    #2, A0
+    RTS
+
+ea_displacement_start:
+    CMPI.B  #0,     D1
+    BNE ea_displacement_not_16
+    JSR ea_displacement_16
+ea_displacement_not_16:
+    CMPI.B  #$FF,    D1
+    BNE ea_displacement_not_32
+    JSR ea_displacement_32
+ea_displacement_not_32:
+    MOVE.B  D1,     D3
+    JSR     int_to_ascii
+    ADDA    #2,     A0
+    RTS
+    
+ea_displacement_16:
+    ADDA    #2, A0
+    MOVE.W  (A0), D3
+    JSR     int_to_ascii
+    ADDA    #2, A0
+    RTS 
+ea_displacement_32:
+    ADDA    #2, A0
+    MOVE.L  (A0), D3
+    JSR     int_to_ascii
+    ADDA    #4, A0
+    RTS 
+    
+ea_register_list_mask_start:
+
+********************************************
+*            EA DATA REGISTER              *
+********************************************
 ea_d0:
     MOVE.B #'D', (A2)+
     MOVE.B #'0', (A2)+
@@ -84,25 +191,130 @@ ea_d7:
     MOVE.B #'7', (A2)+
     RTS
 
+ea_data_register:
+    MOVE.B  D1, D4
+    ANDI    #7, D4
+    CMPI.B  #0, D4
+    BEQ     ea_d0
+    CMPI.B  #1, D4
+    BEQ     ea_d1
+    CMPI.B  #2, D4
+    BEQ     ea_d2
+    CMPI.B  #3, D4
+    BEQ     ea_d3
+    CMPI.B  #4, D4
+    BEQ     ea_d4
+    CMPI.B  #5, D4
+    BEQ     ea_d5
+    CMPI.B  #6, D4
+    BEQ     ea_d6
+    CMPI.B  #7, D4
+    BEQ     ea_d7
+
+********************************************
+*            EA ADDRESS REGISTER           *
+********************************************
+ea_a0:
+    MOVE.B #'A', (A2)+
+    MOVE.B #'0', (A2)+
+    RTS
+ea_a1:
+    MOVE.B #'A', (A2)+
+    MOVE.B #'1', (A2)+
+    RTS
+ea_a2:
+    MOVE.B #'A', (A2)+
+    MOVE.B #'2', (A2)+
+    RTS
+ea_a3:
+    MOVE.B #'A', (A2)+
+    MOVE.B #'3', (A2)+
+    RTS
+ea_a4:
+    MOVE.B #'A', (A2)+
+    MOVE.B #'4', (A2)+
+    RTS
+ea_a5:
+    MOVE.B #'A', (A2)+
+    MOVE.B #'5', (A2)+
+    RTS
+ea_a6:
+    MOVE.B #'A', (A2)+
+    MOVE.B #'6', (A2)+
+    RTS
+ea_a7:
+    MOVE.B #'A', (A2)+
+    MOVE.B #'7', (A2)+
+    RTS
+
+ea_address_register:
+    MOVE.B  D1, D4
+    ANDI    #7, D4
+    CMPI.B  #0, D4
+    BEQ     ea_a0
+    CMPI.B  #1, D4
+    BEQ     ea_a1
+    CMPI.B  #2, D4
+    BEQ     ea_a2
+    CMPI.B  #3, D4
+    BEQ     ea_a3
+    CMPI.B  #4, D4
+    BEQ     ea_a4
+    CMPI.B  #5, D4
+    BEQ     ea_a5
+    CMPI.B  #6, D4
+    BEQ     ea_a6
+    CMPI.B  #7, D4
+    BEQ     ea_a7
+********************************************
+*            EA ADDRESS                    *
+********************************************
+ea_address:
+    MOVE.B  #'(', (A2)+
+    MOVE.B  D1, D4
+    ANDI    #7, D4
+    CMPI.B  #0, D4
+    JSR     ea_a0
+    CMPI.B  #1, D4
+    JSR     ea_a1
+    CMPI.B  #2, D4
+    JSR    ea_a2
+    CMPI.B  #3, D4
+    JSR    ea_a3
+    CMPI.B  #4, D4
+    JSR     ea_a4
+    CMPI.B  #5, D4
+    JSR     ea_a5
+    CMPI.B  #6, D4
+    JSR     ea_a6
+    CMPI.B  #7, D4
+    JSR     ea_a7
+    MOVE.B  #')', (A2)+
+    RTS
+
+
+
 ********************************************
 *             SIZE PARSERS                 *
 ********************************************
 light_purple_size:
     MOVE.B  #'.', (A2)+
-    LSR     #1, D3
+    ROR    #1, D3
     BCS     size_w
-    LSR     #1, D3
+    ROR     #1, D3
     BCS     size_l
     BRA     size_b
-
 size_b:
     MOVE.B  #'B', (A2)+
+    ROL     #2,     D3
     RTS
 size_w:
     MOVE.B  #'W', (A2)+
+    ROL     #1,     D3
     RTS
 size_l:
     MOVE.B  #'L', (A2)+
+    ROL     #2,     D3
     RTS
 
 ********************************************
@@ -155,7 +367,7 @@ code0100:
     BEQ     op_trap         ;TRAP
     LSR     #2, D5          ;gets the first 10 bits
     ANDI.B  #$7, D5         ;clear size bit
-    CMPI.B  #$7, D5 
+    CMPI.B  #$7, D5
     BEQ     op_lea          ;LEA
 * Constant OP codes (NOP, STOP, RTE, RTS)
     CMPI.W  #$4E71, (A0)
@@ -181,7 +393,7 @@ code0101:
     LSR.W   #1,  D5
     BCS     op_subq
     BRA     op_addq
-    
+
 code0110:
     MOVE.W  (A0), D5
     LSR.W   #8,   D5
@@ -222,7 +434,7 @@ code1100:
     LSR.W   #1, D5
     BCC     op_mulu
     BRA     op_muls
-    
+
 code1101:
     MOVE.W  (A0), D5
     LSR.W   #7, D5
@@ -238,8 +450,8 @@ code1110:
     LSR.W   #1, D5
     BCC     code_shift_reg
     BRA     code_shift_ea
-    
-    
+
+
 code_shift_reg:
     MOVE.W  (A0), D5
     LSR.W   #4, D5
@@ -247,7 +459,7 @@ code_shift_reg:
     LSR.W   #1, D5
     BCC     op_lsx_reg
     BRA     op_rox_reg
-    
+
 code_shift_ea:
     MOVE.W  (A0), D5
     LSL.W   #6, D5
@@ -264,9 +476,9 @@ op_ori:
     MOVE.B  #'O', (A2)+
     MOVE.B  #'R', (A2)+
     MOVE.B  #'I', (A2)+
-    MOVE.W  (A0), D3
-    LSR     #6, D3
-    JSR     light_purple_size
+    JSR     ea_immediate_start
+    MOVE.B  #',', (A2)+
+    MOVE.B  #' ', (A2)+
     JSR     ea_start
     JMP     op_finish
 
@@ -275,31 +487,31 @@ op_andi:
     MOVE.B  #'N', (A2)+
     MOVE.B  #'D', (A2)+
     MOVE.B  #'I', (A2)+
-    MOVE.W  (A0), D3
-    LSR     #6, D3
-    JSR     light_purple_size
+    JSR     ea_immediate_start
+    MOVE.B  #',', (A2)+
+    MOVE.B  #' ', (A2)+
     JSR     ea_start
     JMP     op_finish
-    
+
 op_subi:
     MOVE.B  #'S', (A2)+
     MOVE.B  #'U', (A2)+
     MOVE.B  #'B', (A2)+
     MOVE.B  #'I', (A2)+
-    MOVE.W  (A0), D3
-    LSR     #6, D3
-    JSR     light_purple_size
+    JSR     ea_immediate_start
+    MOVE.B  #',', (A2)+
+    MOVE.B  #' ', (A2)+
     JSR     ea_start
     JMP     op_finish
-    
+
 op_addi:
     MOVE.B  #'A', (A2)+
     MOVE.B  #'D', (A2)+
     MOVE.B  #'D', (A2)+
     MOVE.B  #'I', (A2)+
-    MOVE.W  (A0), D3
-    LSR     #6, D3
-    JSR     light_purple_size
+    JSR     ea_immediate_start
+    MOVE.B  #',', (A2)+
+    MOVE.B  #' ', (A2)+
     JSR     ea_start
     JMP     op_finish
 
@@ -308,9 +520,9 @@ op_eori:
     MOVE.B  #'O', (A2)+
     MOVE.B  #'R', (A2)+
     MOVE.B  #'I', (A2)+
-    MOVE.W  (A0), D3
-    LSR     #6, D3
-    JSR     light_purple_size
+    JSR     ea_immediate_start
+    MOVE.B  #',', (A2)+
+    MOVE.B  #' ', (A2)+
     JSR     ea_start
     JMP     op_finish
 
@@ -319,9 +531,9 @@ op_cmpi:
     MOVE.B  #'M', (A2)+
     MOVE.B  #'P', (A2)+
     MOVE.B  #'I', (A2)+
-    MOVE.W  (A0), D3
-    LSR     #6, D3
-    JSR     light_purple_size
+    JSR     ea_immediate_start
+    MOVE.B  #',', (A2)+
+    MOVE.B  #' ', (A2)+
     JSR     ea_start
     JMP     op_finish
 
@@ -361,7 +573,7 @@ dark_purple_sizing2:
 dark_purple_sizing3:
     ; EA on SRC
 
-                                ;MOVEA 
+                                ;MOVEA
 
     ANDI.B   #$C0, D6            ; Zero out last 6 bits, preserving first 2 (size) - xx000000
     OR.B    D6, D1              ; Move size into EA register with address - xx yyyyyy
@@ -382,7 +594,7 @@ op_clr:
     MOVE.W  (A0), D3
     LSR     #6, D3
     JSR     light_purple_size
-    
+
     BRA     op_not_clr_continue
 op_not:
     MOVE.B  #'N', (A2)+
@@ -391,12 +603,12 @@ op_not:
     MOVE.W  (A0), D3
     LSR     #6, D3
     JSR     light_purple_size
-    
+
 op_not_clr_continue:
     MOVE.B  (A0), D3
     LSR     #6, D3
     JSR     light_purple_size
-    
+
     MOVE.B  (A0), D1            ; Move EA of instruction into EA register
     JSR     ea_start
     JMP     op_finish
@@ -411,7 +623,7 @@ op_ext:
     BEQ     opext_size_word
     CMPI.B  #3,   D5
     BEQ     opext_size_long
-     
+
 opext_size_word:
     MOVE.B  #'W',   (A2)+
     BRA     opext_continue
@@ -424,7 +636,7 @@ opext_continue:
     MOVE.B  #'D',   (A2)+
     JMP op_finish
 
-    
+
 op_trap:
     MOVE.B  #'T', (A2)+
     MOVE.B  #'R', (A2)+
@@ -436,7 +648,7 @@ op_trap:
     AND.L   #$0F,   D3
     JSR     int_to_ascii
     JMP     op_finish
-    
+
 op_nop:
     MOVE.B  #'N', (A2)+
     MOVE.B  #'O', (A2)+
@@ -486,7 +698,7 @@ op_lea:
     MOVE.B  #'A', (A2)+
     JMP     ea_start
     JMP     op_finish
-    
+
 ********************************************
 *                 OP 0101                  *
 ********************************************
@@ -512,7 +724,7 @@ op_subq:
     JSR light_purple_size
     JSR     ea_start
     JMP     op_finish
-    
+
 ********************************************
 *                 OP 0110                  *
 ********************************************
@@ -520,20 +732,18 @@ op_bra:
     MOVE.B  #'B', (A2)+
     MOVE.B  #'R', (A2)+
     MOVE.B  #'A', (A2)+
-    MOVE.W  (A0), D3
-    ANDI.L  #$FF, D3
-    JSR     int_to_ascii
-    JSR     ea_start
+    MOVE.W  (A0),   D1
+    ANDI    #$F,    D1
+    JSR     ea_displacement_start
     JMP     op_finish
 
 op_bsr:
     MOVE.B  #'B', (A2)+
     MOVE.B  #'S', (A2)+
     MOVE.B  #'R', (A2)+
-    MOVE.W  (A0), D3
-    ANDI.L  #$FF, D3
-    JSR     int_to_ascii
-    JSR     ea_start
+    MOVE.W  (A0),   D1
+    ANDI    #$F,    D1
+    JSR     ea_displacement_start
     JMP     op_finish
 op_bcc:
     MOVE.B  #'B', (A2)+
@@ -573,7 +783,7 @@ op_bcc_cc:
     MOVE.B #'C', (A2)+
     MOVE.B #'C', (A2)+
     JMP     op_bcc_continue
-    
+
 op_bcs:
     MOVE.B #'C', (A2)+
     MOVE.B #'S', (A2)+
@@ -625,7 +835,7 @@ op_bvc:
 op_bvs:
     MOVE.B #'V', (A2)+
     MOVE.B #'S', (A2)+
-    
+
 op_bcc_continue:
     MOVE.W  (A0), D5
     ANDI.L  #$F, D5
@@ -635,13 +845,14 @@ op_bcc_continue:
 op_bcc_size_word:
     MOVE.B #'.', (A2)+
     MOVE.B #'W', (A2)+
-    JMP     op_bcc_size_continue   
+    JMP     op_bcc_size_continue
 op_bcc_size_byte:
     MOVE.B #'.', (A2)+
     MOVE.B #'B', (A2)+
 op_bcc_size_continue:
-
-;TODO PROGRAM COUNTER
+    MOVE.W  (A0),   D1
+    ANDI    #$F,    D1
+    JSR     ea_displacement_start
     JMP     op_finish
 
 ********************************************
@@ -720,7 +931,7 @@ op_divu:
     MOVE.B  #'V', (A2)+
     MOVE.B  #'U', (A2)+
     JMP     op_finish
-    
+
 ********************************************
 *                 OP 1001                  *
 ********************************************
@@ -755,7 +966,7 @@ op_cmp:
     JSR     light_purple_size
     JSR     ea_start
     JMP     op_finish
-    
+
 ********************************************
 *                 OP 1100                  *
 ********************************************
@@ -806,7 +1017,7 @@ op_adda:
 op_adda_continue:
     JSR     ea_start
     JMP     op_finish
-     
+
 op_adda_size_word:
     MOVE.B  #'W',   (A2)+
     BRA     op_adda_continue
@@ -814,7 +1025,7 @@ op_adda_size_word:
 op_adda_size_long:
     MOVE.B  #'L',   (A2)+
     BRA     op_adda_continue
-    
+
 ********************************************
 *                 OP 1110                  *
 ********************************************
@@ -827,7 +1038,7 @@ op_asx_reg:
     MOVE.B #'A', (A2)+
     MOVE.B #'S', (A2)+
     BRA     op_shift_reg
-    
+
 op_lsx_reg:
     MOVE.B #'L', (A2)+
     MOVE.B #'S', (A2)+
@@ -863,36 +1074,38 @@ op_shift_ea_continue:
 
 op_shift_reg:
     MOVE.W  (A0), D5
-    LSR.W   #8, D5
-    BCS     op_shift_reg
+    LSL.W   #8, D5
+    BCS     op_shiftleft_reg
     MOVE.B  #'R', (A2)+
     BRA     op_shift_reg_continue
-op_shift_reg:
+op_shiftleft_reg:
     MOVE.B  #'L', (A2)+
 op_shift_reg_continue:
     MOVE.W  (A0), D3
     LSR.W   #6, D3
+    JSR     light_purple_size
     MOVE.B  #' ', (A2)+
-    JSR     light_purple_sizing
-    BCS     op_shift_mode_reg
-    MOVE.B  '#'
-    BRA     op_shift_mode_continue
-op_shift_mode_reg:
-    MOVE.B  #'D', (A2)+
-op_shift_mode_continue:
-    CLR.L   D3
-    MOVE.B  (A0), D3
-    JSR     int_to_ascii
-    JMP     op_finish
+    LSR.W   #3, D3
+    ANDI.B  #$7, D3
+    JSR int_to_ascii
+    CLR     D3
+    MOVE.W  (A0), D3
+    ANDI.L  #$7, D3
+    JSR int_to_ascii
+    JMP op_finish
 
 op_finish:
+    MOVE.B #$0D, (A2)+
+    MOVE.B #$0A, (A2)+
     MOVE.B #0, (A2)+
     MOVEA #0, A1
     MOVE.B #14, D0
     TRAP #15
-    BRA end
-    
+    MOVE.L #0, A2
+    BRA op_start
+
 op_unsupported:
+    BRA end
 
 int_to_ascii:
     CLR.L   D5
@@ -918,7 +1131,7 @@ itoa_continue:
 itoa_character:
     ADDI.B #7, D4
     JMP itoa_continue
-    
+
 ;itoa_negative:
     ;NOT.L    D3
    ; ADDI    #1, D3
@@ -933,11 +1146,6 @@ end:
 
     SIMHALT             ; halt simulator
     END    START        ; last line of source
-
-
-
-
-
 
 
 *~Font name~Courier New~
