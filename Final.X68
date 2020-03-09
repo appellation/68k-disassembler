@@ -98,7 +98,7 @@ ea_immediate_size_l:
     MOVE.B  #'L', (A2)+
     MOVE.B #' ', (A2)+
     BRA     ea_long_immediate
-    
+
 ea_long_immediate:
     ADDA    #2, A0
     MOVE.L  (A0), D3
@@ -225,15 +225,15 @@ ea_displacement_not_16:
     BNE ea_displacement_not_32
     JMP ea_displacement_32
 ea_displacement_not_32:
-    LSL.B   #4, D1
-    ASR.B   #4, D1
-    ADDA   #2,     A0
+    LSL.W   #8, D1
+    ASR.W   #8, D1
     MOVE.L  A0, D4
+    ADDI.B  #2, D4
     ADD.B   D1, D4
     MOVE.W  D4, D3
     JSR     int_to_ascii
     RTS
-    
+
 ea_displacement_16:
     ADDA    #2, A0
     MOVE.L  A0, D4
@@ -241,7 +241,7 @@ ea_displacement_16:
     MOVE.W   D4, D3
     JSR     int_to_ascii
     ;ADDA    #2, A0
-    RTS 
+    RTS
 ea_displacement_32:
     ADDA    #2, A0
     MOVE.L  A0, D4
@@ -249,7 +249,7 @@ ea_displacement_32:
     MOVE.L  D4, D3
     JSR     int_to_ascii
     ADDA    #2, A0
-    RTS 
+    RTS
 
 ea_mode_seven:
     MOVE.B  D1, D5
@@ -261,7 +261,7 @@ ea_mode_seven:
     CMPI.B  #$3C,   D5
     BEQ     ea_mode_seven_immediate
     BRA ea_not_supported
-    
+
 ea_mode_seven_abs_short:
     MOVE.B  #'(', (A2)+
     ADDA    #2,    A0
@@ -270,7 +270,6 @@ ea_mode_seven_abs_short:
     MOVE.B #')', (A2)+
     MOVE.B #'.', (A2)+
     MOVE.B  #'W', (A2)+
-    ADDA    #2,     A0
     RTS
 
 ea_mode_seven_abs_long:
@@ -281,7 +280,7 @@ ea_mode_seven_abs_long:
     MOVE.B #')', (A2)+
     MOVE.B #'.', (A2)+
     MOVE.B  #'L', (A2)+
-    ADDA    #4,     A0
+    ADDA    #2,     A0
     RTS
 
 ea_mode_seven_immediate:
@@ -289,19 +288,251 @@ ea_mode_seven_immediate:
     MOVE.L  (A0), D3
     MOVE.B  #'#', (A2)+
     JSR     int_to_ascii
-    ADDA    #4, A0
+    ADDA    #2, A0
     RTS
 
 
 ea_address_displacement:
     BRA ea_not_supported
-    
+
 ea_address_index:
     BRA ea_not_supported
 
 ea_not_supported:
     JMP op_finish
-ea_register_list_mask_start:
+
+ea_rlm_predecr_start:
+    ADDA    #2, A0
+    CLR     D3
+    CLR     D6
+    CLR     D7
+    MOVE.W  (A0),   D7
+    MOVE.B  #0, D3
+ea_rlm_pd_data_loop_start:
+    LSL.W   #1, D7
+    BCC     ea_rlm_pd_data_loop_end
+    CMPI.B  #0, D6
+    BEQ     ea_rlm_pd_data_loop_noslash
+    MOVE.B  #'/', (A2)+
+ea_rlm_pd_data_loop_noslash:
+    MOVE.B  #1, D6
+
+    CMPI.B  #0, D3
+    BNE     ea_rlm_pd_not_d0
+    JSR     ea_d0
+ea_rlm_pd_not_d0:
+    CMPI.B  #1, D3
+    BNE     ea_rlm_pd_not_d1
+    JSR     ea_d1
+    BRA     ea_rlm_pd_data_continue
+ea_rlm_pd_not_d1:
+    CMPI.B  #2, D3
+    BNE     ea_rlm_pd_not_d2
+    JSR     ea_d2
+    BRA     ea_rlm_pd_data_continue
+ea_rlm_pd_not_d2:
+    CMPI.B  #3, D3
+    BNE     ea_rlm_pd_not_d3
+    JSR     ea_d3
+    BRA     ea_rlm_pd_data_continue
+ea_rlm_pd_not_d3:
+    CMPI.B  #4, D3
+    BNE     ea_rlm_pd_not_d4
+    JSR     ea_d4
+    BRA     ea_rlm_pd_data_continue
+ea_rlm_pd_not_d4:
+    CMPI.B  #5, D3
+    BNE     ea_rlm_pd_not_d5
+    JSR     ea_d5
+    BRA     ea_rlm_pd_data_continue
+ea_rlm_pd_not_d5:
+    CMPI.B  #6, D3
+    BNE     ea_rlm_pd_not_d6
+    JSR     ea_d6
+    BRA     ea_rlm_pd_data_continue
+ea_rlm_pd_not_d6:
+    CMPI.B  #7, D3
+    BNE     ea_rlm_pd_data_continue
+    JSR     ea_d7
+
+ea_rlm_pd_data_continue:
+ea_rlm_pd_data_loop_end:
+    ADDQ.B  #1,     D3
+    CMPI.B  #8,     D3
+    BLT     ea_rlm_pd_data_loop_start
+
+    MOVE.B  #0,     D3
+
+
+ea_rlm_pd_addr_loop_start:
+    LSL.W   #1, D7
+    BCC     ea_rlm_pd_addr_loop_end
+    CMPI.B  #1, D6
+    BNE     ea_rlm_pd_addr_loop_noslash
+    MOVE.B  #'/', (A2)+
+ea_rlm_pd_addr_loop_noslash:
+    MOVE.B  #1, D6
+
+    CMPI.B  #0, D3
+    BNE     ea_rlm_pd_not_a0
+    JSR     ea_a0
+ea_rlm_pd_not_a0:
+    CMPI.B  #1, D3
+    BNE     ea_rlm_pd_not_a1
+    JSR     ea_a1
+    BRA     ea_rlm_pd_addr_continue
+ea_rlm_pd_not_a1:
+    CMPI.B  #2, D3
+    BNE     ea_rlm_pd_not_a2
+    JSR     ea_a2
+    BRA     ea_rlm_pd_addr_continue
+ea_rlm_pd_not_a2:
+    CMPI.B  #3, D3
+    BNE     ea_rlm_pd_not_a3
+    JSR     ea_a3
+    BRA     ea_rlm_pd_addr_continue
+ea_rlm_pd_not_a3:
+    CMPI.B  #4, D3
+    BNE     ea_rlm_pd_not_a4
+    JSR     ea_a4
+    BRA     ea_rlm_pd_addr_continue
+ea_rlm_pd_not_a4:
+    CMPI.B  #5, D3
+    BNE     ea_rlm_pd_not_a5
+    JSR     ea_a5
+    BRA     ea_rlm_pd_addr_continue
+ea_rlm_pd_not_a5:
+    CMPI.B  #6, D3
+    BNE     ea_rlm_pd_not_a6
+    JSR     ea_a6
+    BRA     ea_rlm_pd_addr_continue
+ea_rlm_pd_not_a6:
+    CMPI.B  #7, D3
+    BNE     ea_rlm_pd_addr_continue
+    JSR     ea_a7
+ea_rlm_pd_addr_continue:
+ea_rlm_pd_addr_loop_end:
+    ADDQ.B  #1,     D3
+    CMPI.B  #8,     D3
+    BLT     ea_rlm_pd_addr_loop_start
+
+    RTS
+
+ea_rlm_postincr_start:
+    ADDA    #2, A0
+    CLR     D3
+    CLR     D6
+    CLR     D7
+    MOVE.W  (A0),   D7
+
+    MOVE.B  #7,     D3
+ea_rlm_pi_addr_loop_start:
+    LSL.W   #1, D7
+    BCC     ea_rlm_pi_addr_loop_end
+    CMPI.B  #1, D6
+    BNE     ea_rlm_pi_addr_loop_noslash
+    MOVE.B  #'/', (A2)+
+ea_rlm_pi_addr_loop_noslash:
+    MOVE.B  #1, D6
+
+    CMPI.B  #0, D3
+    BNE     ea_rlm_pi_not_a0
+    JSR     ea_a0
+ea_rlm_pi_not_a0:
+    CMPI.B  #1, D3
+    BNE     ea_rlm_pi_not_a1
+    JSR     ea_a1
+    BRA     ea_rlm_pi_addr_continue
+ea_rlm_pi_not_a1:
+    CMPI.B  #2, D3
+    BNE     ea_rlm_pi_not_a2
+    JSR     ea_a2
+    BRA     ea_rlm_pi_addr_continue
+ea_rlm_pi_not_a2:
+    CMPI.B  #3, D3
+    BNE     ea_rlm_pi_not_a3
+    JSR     ea_a3
+    BRA     ea_rlm_pi_addr_continue
+ea_rlm_pi_not_a3:
+    CMPI.B  #4, D3
+    BNE     ea_rlm_pi_not_a4
+    JSR     ea_a4
+    BRA     ea_rlm_pi_addr_continue
+ea_rlm_pi_not_a4:
+    CMPI.B  #5, D3
+    BNE     ea_rlm_pi_not_a5
+    JSR     ea_a5
+    BRA     ea_rlm_pi_addr_continue
+ea_rlm_pi_not_a5:
+    CMPI.B  #6, D3
+    BNE     ea_rlm_pi_not_a6
+    JSR     ea_a6
+    BRA     ea_rlm_pi_addr_continue
+ea_rlm_pi_not_a6:
+    CMPI.B  #7, D3
+    BNE     ea_rlm_pi_addr_continue
+    JSR     ea_a7
+ea_rlm_pi_addr_continue:
+ea_rlm_pi_addr_loop_end:
+    SUBQ.B  #1,     D3
+    CMPI.B  #0,     D3
+    BGE     ea_rlm_pi_addr_loop_start
+
+    MOVE.B  #7, D3
+ea_rlm_pi_data_loop_start:
+    LSL.W   #1, D7
+    BCC     ea_rlm_pi_data_loop_end
+    CMPI.B  #0, D6
+    BEQ     ea_rlm_pi_data_loop_noslash
+    MOVE.B  #'/', (A2)+
+ea_rlm_pi_data_loop_noslash:
+    MOVE.B  #1, D6
+
+    CMPI.B  #0, D3
+    BNE     ea_rlm_pi_not_d0
+    JSR     ea_d0
+ea_rlm_pi_not_d0:
+    CMPI.B  #1, D3
+    BNE     ea_rlm_pi_not_d1
+    JSR     ea_d1
+    BRA     ea_rlm_pi_data_continue
+ea_rlm_pi_not_d1:
+    CMPI.B  #2, D3
+    BNE     ea_rlm_pi_not_d2
+    JSR     ea_d2
+    BRA     ea_rlm_pi_data_continue
+ea_rlm_pi_not_d2:
+    CMPI.B  #3, D3
+    BNE     ea_rlm_pi_not_d3
+    JSR     ea_d3
+    BRA     ea_rlm_pi_data_continue
+ea_rlm_pi_not_d3:
+    CMPI.B  #4, D3
+    BNE     ea_rlm_pi_not_d4
+    JSR     ea_d4
+    BRA     ea_rlm_pi_data_continue
+ea_rlm_pi_not_d4:
+    CMPI.B  #5, D3
+    BNE     ea_rlm_pi_not_d5
+    JSR     ea_d5
+    BRA     ea_rlm_pi_data_continue
+ea_rlm_pi_not_d5:
+    CMPI.B  #6, D3
+    BNE     ea_rlm_pi_not_d6
+    JSR     ea_d6
+    BRA     ea_rlm_pi_data_continue
+ea_rlm_pi_not_d6:
+    CMPI.B  #7, D3
+    BNE     ea_rlm_pi_data_continue
+    JSR     ea_d7
+
+ea_rlm_pi_data_continue:
+ea_rlm_pi_data_loop_end:
+    SUBQ.B  #1,     D3
+    CMPI.B  #0,     D3
+    BGE     ea_rlm_pi_data_loop_start
+
+    RTS
 
 ********************************************
 *            EA DATA REGISTER              *
@@ -503,7 +734,7 @@ code0000:
     BEQ     op_subi
     CMPI    #6, D5          ; ADDI
     BEQ     op_addi
-    CMPI    #8, D5          ; EORI
+    CMPI    #$A, D5          ; EORI
     BEQ     op_eori
     CMPI    #$C, D5          ; CMPI
     BEQ     op_cmpi
@@ -739,7 +970,7 @@ dark_purple_sizing3:
     ANDI      #$38, D1
     OR        D7, D1
     LSR.B     #2, D7
-    ;SUBA      #2, A0
+    MOVE.B    #',', (A2)+
     MOVE.B    #' ', (A2)+
     JSR     ea_start                           ;MOVEA
     BRA     op_finish
@@ -765,6 +996,7 @@ op_not_clr_continue:
     MOVE.W  (A0), D3
     LSR     #6, D3
     JSR     light_purple_size            ; Move EA of instruction into EA register
+    MOVE.B  #' ', (A2)+
     JSR     ea_start
     JMP     op_finish
 op_ext:
@@ -773,11 +1005,9 @@ op_ext:
     MOVE.B  #'T', (A2)+
     MOVE.B  #'.', (A2)+
     MOVE.W  (A0), D5
-    LSR.B   #6,   D5
-    CMPI.B  #2,   D5
-    BEQ     opext_size_word
-    CMPI.B  #3,   D5
-    BEQ     opext_size_long
+    LSR.B   #7,   D5
+    BCC     opext_size_word
+    BRA     opext_size_long
 
 opext_size_word:
     MOVE.B  #'W',   (A2)+
@@ -788,8 +1018,10 @@ opext_size_long:
     BRA     opext_continue
 
 opext_continue:
-    MOVE.B  #'D',   (A2)+
-    JMP op_finish
+    MOVE.B  #' ', (A2)+
+    MOVE.B  (A0), D3
+    JSR     ea_start
+    JMP     op_finish
 
 
 op_trap:
@@ -814,6 +1046,10 @@ op_stop:
     MOVE.B  #'T', (A2)+
     MOVE.B  #'O', (A2)+
     MOVE.B  #'P', (A2)+
+    MOVE.B  #' ', (A2)+
+    ADDA    #2, A0
+    MOVE.W  (A0), D3
+    JSR     int_to_ascii
     JMP     op_finish
 op_rte:
     MOVE.B  #'R', (A2)+
@@ -835,6 +1071,7 @@ op_jmp:
     MOVE.B  #'J', (A2)+
     MOVE.B  #'M', (A2)+
     MOVE.B  #'P', (A2)+
+    MOVE.B  #' ', (A2)+
     JSR     ea_start
     JMP     op_finish
 op_movem:
@@ -843,11 +1080,44 @@ op_movem:
     MOVE.B  #'V', (A2)+
     MOVE.B  #'E', (A2)+
     MOVE.B  #'M', (A2)+
+    CLR     D3
     MOVE.W  (A0), D3
-    LSR     #6, D3
+    LSR     #7, D3
+    BCS     op_movem_size_long
+    MOVE.B  #%01, D3
+    BRA     op_movem_size_continue
+op_movem_size_long:
+    MOVE.B  #%10, D3
+op_movem_size_continue:
     JSR     light_purple_size
+
+    MOVE.B  #' ', (A2)+
+
+    CLR     D3
+    MOVE.B  (A0), D3
+    LSR.B   #3, D3
+    BCS     op_movem_reg_to_mem
+    JSR     op_movem_register
+    MOVE.B  #',', (A2)+
+    MOVE.B  #' ', (A2)+
     JSR     ea_start
     JMP     op_finish
+op_movem_reg_to_mem:
+    JSR     ea_start
+    MOVE.B  #',', (A2)+
+    MOVE.B  #' ', (A2)+
+    JSR     op_movem_register
+    JMP     op_finish
+
+op_movem_register:
+    CLR     D3
+    MOVE.W  (A0), D3
+    LSR.B   #3, D3
+    ANDI.B  #7, D3
+    CMPI.B  #4, D3
+    BEQ     ea_rlm_predecr_start
+    BRA     ea_rlm_postincr_start
+
 op_lea:
     MOVE.B  #'L', (A2)+
     MOVE.B  #'E', (A2)+
@@ -867,11 +1137,13 @@ op_addq:
     MOVE.B  #'D', (A2)+
     MOVE.B  #'D', (A2)+
     MOVE.B  #'Q', (A2)+
+    CLR.L   D3
     MOVE.W  (A0), D3
     LSR     #6, D3
     JSR     light_purple_size
     MOVE.B  #' ', (A2)+
     MOVE.B  #'#', (A2)+
+    CLR.L   D3
     MOVE.B  (A0), D3
     LSR     #1, D3
     ANDI    #7, D3
@@ -886,11 +1158,13 @@ op_subq:
     MOVE.B  #'U', (A2)+
     MOVE.B  #'B', (A2)+
     MOVE.B  #'Q', (A2)+
+    CLR.L   D3
     MOVE.W  (A0), D3
     LSR     #6, D3
     JSR     light_purple_size
     MOVE.B  #' ', (A2)+
     MOVE.B  #'#', (A2)+
+    CLR.L   D3
     MOVE.B  (A0), D3
     LSR     #1, D3
     ANDI    #7, D3
@@ -909,7 +1183,7 @@ op_bra:
     MOVE.B  #'R', (A2)+
     MOVE.B  #'A', (A2)+
     MOVE.W  (A0),   D1
-    ANDI    #$F,    D1
+    ANDI    #$FF,   D1
     JSR     ea_displacement_start
     JMP     op_finish
 
@@ -1140,14 +1414,14 @@ op_eor:
     LSR     #6, D3
     JSR     light_purple_size
     MOVE.B  #' ', (A2)+
-    MOVE.W  (A0), D1
+    MOVE.B  (A0), D1
+    LSR     #1, D1
+    ANDI    #7, D1
     JSR     ea_start
     MOVE.B  #',', (A2)+
     MOVE.B  #' ', (A2)+
     CLR.L   D1
-    MOVE.B  (A0), D1
-    LSR     #1, D1
-    ANDI    #7, D1
+    MOVE.W  (A0), D1
     JSR     ea_start
     JMP     op_finish
 op_cmp:
@@ -1210,7 +1484,7 @@ op_mulu:
     ANDI    #7, D1
     JSR     ea_start
     JMP     op_finish
-    
+
 op_muls:
     MOVE.B  #'M', (A2)+
     MOVE.B  #'U', (A2)+
@@ -1327,6 +1601,7 @@ op_shift_left_ea:
 op_shift_ea_continue:
     MOVE.W  (A0), D1
     ANDI    #$FF,    D1
+    MOVE.B  #' ', (A2)+
     JSR     ea_start
     JMP     op_finish
 
@@ -1427,6 +1702,12 @@ end:
 
     SIMHALT             ; halt simulator
     END    START        ; last line of source
+
+
+
+
+
+
 
 
 

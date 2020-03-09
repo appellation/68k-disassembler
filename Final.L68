@@ -1,0 +1,1939 @@
+00001000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.16.01
+Created On: 3/8/2020 8:33:52 PM
+
+00000000                             1  
+00000000                             2  *-----------------------------------------------------------
+00000000                             3  * Title      : CSS422 - Disassembler
+00000000                             4  * Written by : Derek Bui & Will Nelson
+00000000                             5  * Date       : February 26, 2020
+00000000                             6  * Description: Disassembles 68K binary code into ASM
+00000000                             7  *-----------------------------------------------------------
+00001000                             8      ORG    $1000
+00001000                             9  START:                  ; first instruction of program
+00001000                            10  
+00001000                            11  * Put program code here
+00001000  41F8 0400                 12      LEA $400, A0
+00001004                            13  op_start:
+00001004  2410                      14      MOVE.L (A0), D2
+00001006  E08A                      15      LSR.L #8, D2
+00001008  E08A                      16      LSR.L #8, D2
+0000100A  E08A                      17      LSR.L #8, D2
+0000100C  E88A                      18      LSR.L #4, D2
+0000100E  0C02 0000                 19      CMPI.B #0, D2
+00001012  6700 07B2                 20      BEQ    code0000
+00001016  0C02 0001                 21      CMPI.B #1, D2
+0000101A  6700 07E4                 22      BEQ    code0001
+0000101E  0C02 0002                 23      CMPI.B #2, D2
+00001022  6700 07E0                 24      BEQ     code0010
+00001026  0C02 0003                 25      CMPI.B #3, D2
+0000102A  6700 07DC                 26      BEQ     code0011
+0000102E  0C02 0004                 27      CMPI.B #4, D2
+00001032  6700 07D8                 28      BEQ     code0100
+00001036  0C02 0005                 29      CMPI.B #5, D2
+0000103A  6700 0852                 30      BEQ     code0101
+0000103E  0C02 0006                 31      CMPI.B #6, D2
+00001042  6700 085A                 32      BEQ     code0110
+00001046  0C02 0007                 33      CMPI.B  #7, D2
+0000104A  6700 086A                 34      BEQ     code0111
+0000104E  0C02 0008                 35      CMPI.B  #8, D2
+00001052  6700 0866                 36      BEQ     code1000
+00001056  0C02 0009                 37      CMPI.B  #9, D2
+0000105A  6700 0878                 38      BEQ     code1001
+0000105E  0C02 000B                 39      CMPI.B  #$B, D2
+00001062  6700 0876                 40      BEQ     code1011
+00001066  0C02 000C                 41      CMPI.B  #$C, D2
+0000106A  6700 087C                 42      BEQ     code1100
+0000106E  0C02 000D                 43      CMPI.B  #$D, D2
+00001072  6700 088E                 44      BEQ     code1101
+00001076  0C02 000E                 45      CMPI.B  #$E, D2
+0000107A  6700 089A                 46      BEQ     code1110
+0000107E  6000 11CE                 47      BRA op_unsupported
+00001082                            48  ********************************************
+00001082                            49  *          PROGRAM COUNTER                 *
+00001082                            50  ********************************************
+00001082                            51  
+00001082                            52  
+00001082                            53  ********************************************
+00001082                            54  *                 EA START                 *
+00001082                            55  ********************************************
+00001082                            56  
+00001082                            57  ea_start:
+00001082  3801                      58      MOVE.W D1, D4
+00001084  E64C                      59      LSR     #3, D4
+00001086  0244 0007                 60      ANDI    #7, D4
+0000108A  0C04 0000                 61      CMPI.B  #0, D4
+0000108E  6700 05CC                 62      BEQ ea_data_register
+00001092  0C04 0001                 63      CMPI.B  #1, D4
+00001096  6700 064A                 64      BEQ ea_address_register
+0000109A  0C04 0002                 65      CMPI.B  #2, D4
+0000109E  6700 0678                 66      BEQ ea_address
+000010A2  0C04 0003                 67      CMPI.B  #3, D4
+000010A6  6700 0096                 68      BEQ ea_address_post_increment
+000010AA  0C04 0004                 69      CMPI.B  #4, D4
+000010AE  6700 012A                 70      BEQ ea_address_pre_decrement
+000010B2  0C04 0005                 71      CMPI.B  #5, D4
+000010B6  6700 027E                 72      BEQ ea_address_displacement
+000010BA  0C04 0006                 73      CMPI.B  #6, D4
+000010BE  6700 027A                 74      BEQ ea_address_index
+000010C2  0C04 0007                 75      CMPI.B  #7, D4
+000010C6  6700 0200                 76      BEQ ea_mode_seven
+000010CA                            77  
+000010CA                            78  ea_immediate_start:
+000010CA  14FC 002E                 79      MOVE.B  #'.', (A2)+
+000010CE  1601                      80      MOVE.B  D1, D3
+000010D0  EE4B                      81      LSR     #7, D3
+000010D2  6500 0018                 82      BCS     ea_immediate_size_w
+000010D6  E24B                      83      LSR     #1, D3
+000010D8  6500 001E                 84      BCS     ea_immediate_size_l
+000010DC  6000 0002                 85      BRA     ea_immediate_size_b
+000010E0                            86  
+000010E0                            87  ea_immediate_size_b:
+000010E0  14FC 0042                 88      MOVE.B  #'B', (A2)+
+000010E4  14FC 0020                 89      MOVE.B  #' ', (A2)+
+000010E8  6000 0038                 90      BRA     ea_byte_immediate
+000010EC                            91  
+000010EC                            92  ea_immediate_size_w:
+000010EC  14FC 0057                 93      MOVE.B  #'W', (A2)+
+000010F0  14FC 0020                 94      MOVE.B  #' ', (A2)+
+000010F4  6000 002C                 95      BRA     ea_word_immediate
+000010F8                            96  
+000010F8                            97  ea_immediate_size_l:
+000010F8  14FC 004C                 98      MOVE.B  #'L', (A2)+
+000010FC  14FC 0020                 99      MOVE.B #' ', (A2)+
+00001100  6000 0002                100      BRA     ea_long_immediate
+00001104                           101  
+00001104                           102  ea_long_immediate:
+00001104  5448                     103      ADDA    #2, A0
+00001106  2610                     104      MOVE.L  (A0), D3
+00001108  14FC 0023                105      MOVE.B  #'#', (A2)+
+0000110C  4EB9 00002252            106      JSR int_to_ascii
+00001112  14FC 002C                107      MOVE.B  #',', (A2)+
+00001116  14FC 0020                108      MOVE.B  #' ', (A2)+
+0000111A  4EB8 1082                109      JSR     ea_start
+0000111E  5448                     110      ADDA    #2, A0
+00001120  4E75                     111      RTS
+00001122                           112  
+00001122                           113  ea_byte_immediate:
+00001122                           114  ea_word_immediate:
+00001122  5448                     115      ADDA    #2, A0
+00001124  3610                     116      MOVE.W  (A0), D3
+00001126  14FC 0023                117      MOVE.B  #'#', (A2)+
+0000112A  4EB9 00002252            118      JSR int_to_ascii
+00001130  14FC 002C                119      MOVE.B  #',', (A2)+
+00001134  14FC 0020                120      MOVE.B  #' ', (A2)+
+00001138  4EB8 1082                121      JSR     ea_start
+0000113C                           122     ; ADDA    #2, A0
+0000113C  4E75                     123      RTS
+0000113E                           124  
+0000113E                           125  ea_address_post_increment:
+0000113E  14FC 0028                126      MOVE.B  #'(',   (A2)+
+00001142  1801                     127      MOVE.B  D1,     D4
+00001144  0244 0007                128      ANDI    #$7,    D4
+00001148  0C04 0000                129      CMPI.B  #0, D4
+0000114C  6600 0008                130      BNE     ea_api_not_a0
+00001150  4EB9 00001692            131      JSR     ea_a0
+00001156                           132  ea_api_not_a0:
+00001156  0C04 0001                133      CMPI.B  #1, D4
+0000115A  6600 000C                134      BNE     ea_api_not_a1
+0000115E  4EB9 0000169C            135      JSR     ea_a1
+00001164  6000 006A                136      BRA     ea_api_continue
+00001168                           137  ea_api_not_a1:
+00001168  0C04 0002                138      CMPI.B  #2, D4
+0000116C  6600 000C                139      BNE     ea_api_not_a2
+00001170  4EB9 000016A6            140      JSR     ea_a2
+00001176  6000 0058                141      BRA     ea_api_continue
+0000117A                           142  ea_api_not_a2:
+0000117A  0C04 0003                143      CMPI.B  #3, D4
+0000117E  6600 000C                144      BNE     ea_api_not_a3
+00001182  4EB9 000016B0            145      JSR     ea_a3
+00001188  6000 0046                146      BRA     ea_api_continue
+0000118C                           147  ea_api_not_a3:
+0000118C  0C04 0004                148      CMPI.B  #4, D4
+00001190  6600 000C                149      BNE     ea_api_not_a4
+00001194  4EB9 000016BA            150      JSR     ea_a4
+0000119A  6000 0034                151      BRA     ea_api_continue
+0000119E                           152  ea_api_not_a4:
+0000119E  0C04 0005                153      CMPI.B  #5, D4
+000011A2  6600 000C                154      BNE     ea_api_not_a5
+000011A6  4EB9 000016C4            155      JSR     ea_a5
+000011AC  6000 0022                156      BRA     ea_api_continue
+000011B0                           157  ea_api_not_a5:
+000011B0  0C04 0006                158      CMPI.B  #6, D4
+000011B4  6600 000C                159      BNE     ea_api_not_a6
+000011B8  4EB9 000016CE            160      JSR     ea_a6
+000011BE  6000 0010                161      BRA     ea_api_continue
+000011C2                           162  ea_api_not_a6:
+000011C2  0C04 0007                163      CMPI.B  #7, D4
+000011C6  6600 0008                164      BNE     ea_api_continue
+000011CA  4EB9 000016D8            165      JSR     ea_a7
+000011D0                           166  ea_api_continue:
+000011D0  14FC 0029                167      MOVE.B #')',    (A2)+
+000011D4  14FC 002B                168      MOVE.B #'+',    (A2)+
+000011D8  4E75                     169      RTS
+000011DA                           170  
+000011DA                           171  ea_address_pre_decrement:
+000011DA  14FC 002D                172      MOVE.B  #'-',   (A2)+
+000011DE  14FC 0028                173      MOVE.B  #'(',   (A2)+
+000011E2  1801                     174      MOVE.B  D1,     D4
+000011E4  0244 0007                175      ANDI    #$7,    D4
+000011E8  0C04 0000                176      CMPI.B  #0, D4
+000011EC  6600 0008                177      BNE     ea_apd_not_a0
+000011F0  4EB9 00001692            178      JSR     ea_a0
+000011F6                           179  ea_apd_not_a0:
+000011F6  0C04 0001                180      CMPI.B  #1, D4
+000011FA  6600 000C                181      BNE     ea_apd_not_a1
+000011FE  4EB9 0000169C            182      JSR     ea_a1
+00001204  6000 006A                183      BRA     ea_apd_continue
+00001208                           184  ea_apd_not_a1:
+00001208  0C04 0002                185      CMPI.B  #2, D4
+0000120C  6600 000C                186      BNE     ea_apd_not_a2
+00001210  4EB9 000016A6            187      JSR     ea_a2
+00001216  6000 0058                188      BRA     ea_apd_continue
+0000121A                           189  ea_apd_not_a2:
+0000121A  0C04 0003                190      CMPI.B  #3, D4
+0000121E  6600 000C                191      BNE     ea_apd_not_a3
+00001222  4EB9 000016B0            192      JSR     ea_a3
+00001228  6000 0046                193      BRA     ea_apd_continue
+0000122C                           194  ea_apd_not_a3:
+0000122C  0C04 0004                195      CMPI.B  #4, D4
+00001230  6600 000C                196      BNE     ea_apd_not_a4
+00001234  4EB9 000016BA            197      JSR     ea_a4
+0000123A  6000 0034                198      BRA     ea_apd_continue
+0000123E                           199  ea_apd_not_a4:
+0000123E  0C04 0005                200      CMPI.B  #5, D4
+00001242  6600 000C                201      BNE     ea_apd_not_a5
+00001246  4EB9 000016C4            202      JSR     ea_a5
+0000124C  6000 0022                203      BRA     ea_apd_continue
+00001250                           204  ea_apd_not_a5:
+00001250  0C04 0006                205      CMPI.B  #6, D4
+00001254  6600 000C                206      BNE     ea_apd_not_a6
+00001258  4EB9 000016CE            207      JSR     ea_a6
+0000125E  6000 0010                208      BRA     ea_apd_continue
+00001262                           209  ea_apd_not_a6:
+00001262  0C04 0007                210      CMPI.B  #7, D4
+00001266  6600 0008                211      BNE     ea_apd_continue
+0000126A  4EB9 000016D8            212      JSR     ea_a7
+00001270                           213  ea_apd_continue:
+00001270  14FC 0029                214      MOVE.B  #')', (A2)+
+00001274  4E75                     215      RTS
+00001276                           216  
+00001276                           217  
+00001276                           218  
+00001276                           219  ea_displacement_start:
+00001276  0C01 0000                220      CMPI.B  #0,     D1
+0000127A  6600 0008                221      BNE ea_displacement_not_16
+0000127E  4EF9 000012A6            222      JMP ea_displacement_16
+00001284                           223  ea_displacement_not_16:
+00001284  0C01 00FF                224      CMPI.B  #$FF,    D1
+00001288  6600 0008                225      BNE ea_displacement_not_32
+0000128C  4EF9 000012B6            226      JMP ea_displacement_32
+00001292                           227  ea_displacement_not_32:
+00001292  E149                     228      LSL.W   #8, D1
+00001294  E041                     229      ASR.W   #8, D1
+00001296  2808                     230      MOVE.L  A0, D4
+00001298  5404                     231      ADDI.B  #2, D4
+0000129A  D801                     232      ADD.B   D1, D4
+0000129C  3604                     233      MOVE.W  D4, D3
+0000129E  4EB9 00002252            234      JSR     int_to_ascii
+000012A4  4E75                     235      RTS
+000012A6                           236  
+000012A6                           237  ea_displacement_16:
+000012A6  5448                     238      ADDA    #2, A0
+000012A8  2808                     239      MOVE.L  A0, D4
+000012AA  D850                     240      ADD     (A0), D4
+000012AC  3604                     241      MOVE.W   D4, D3
+000012AE  4EB9 00002252            242      JSR     int_to_ascii
+000012B4                           243      ;ADDA    #2, A0
+000012B4  4E75                     244      RTS
+000012B6                           245  ea_displacement_32:
+000012B6  5448                     246      ADDA    #2, A0
+000012B8  2808                     247      MOVE.L  A0, D4
+000012BA  D850                     248      ADD     (A0), D4
+000012BC  2604                     249      MOVE.L  D4, D3
+000012BE  4EB9 00002252            250      JSR     int_to_ascii
+000012C4  5448                     251      ADDA    #2, A0
+000012C6  4E75                     252      RTS
+000012C8                           253  
+000012C8                           254  ea_mode_seven:
+000012C8  1A01                     255      MOVE.B  D1, D5
+000012CA  0245 003F                256      ANDI    #$3F, D5
+000012CE  0C05 0038                257      CMPI.B  #$38, D5
+000012D2  6700 0016                258      BEQ     ea_mode_seven_abs_short
+000012D6  0C05 0039                259      CMPI.B  #$39, D5
+000012DA  6700 002A                260      BEQ     ea_mode_seven_abs_long
+000012DE  0C05 003C                261      CMPI.B  #$3C,   D5
+000012E2  6700 0040                262      BEQ     ea_mode_seven_immediate
+000012E6  6000 0056                263      BRA ea_not_supported
+000012EA                           264  
+000012EA                           265  ea_mode_seven_abs_short:
+000012EA  14FC 0028                266      MOVE.B  #'(', (A2)+
+000012EE  5448                     267      ADDA    #2,    A0
+000012F0  3610                     268      MOVE.W  (A0), D3
+000012F2  4EB9 00002252            269      JSR int_to_ascii
+000012F8  14FC 0029                270      MOVE.B #')', (A2)+
+000012FC  14FC 002E                271      MOVE.B #'.', (A2)+
+00001300  14FC 0057                272      MOVE.B  #'W', (A2)+
+00001304  4E75                     273      RTS
+00001306                           274  
+00001306                           275  ea_mode_seven_abs_long:
+00001306  14FC 0028                276      MOVE.B  #'(', (A2)+
+0000130A  5448                     277      ADDA    #2,    A0
+0000130C  2610                     278      MOVE.L  (A0), D3
+0000130E  4EB9 00002252            279      JSR int_to_ascii
+00001314  14FC 0029                280      MOVE.B #')', (A2)+
+00001318  14FC 002E                281      MOVE.B #'.', (A2)+
+0000131C  14FC 004C                282      MOVE.B  #'L', (A2)+
+00001320  5448                     283      ADDA    #2,     A0
+00001322  4E75                     284      RTS
+00001324                           285  
+00001324                           286  ea_mode_seven_immediate:
+00001324  5448                     287      ADDA    #2, A0
+00001326  2610                     288      MOVE.L  (A0), D3
+00001328  14FC 0023                289      MOVE.B  #'#', (A2)+
+0000132C  4EB9 00002252            290      JSR     int_to_ascii
+00001332  5448                     291      ADDA    #2, A0
+00001334  4E75                     292      RTS
+00001336                           293  
+00001336                           294  
+00001336                           295  ea_address_displacement:
+00001336  6000 0006                296      BRA ea_not_supported
+0000133A                           297  
+0000133A                           298  ea_address_index:
+0000133A  6000 0002                299      BRA ea_not_supported
+0000133E                           300  
+0000133E                           301  ea_not_supported:
+0000133E  4EF9 0000222C            302      JMP op_finish
+00001344                           303  
+00001344                           304  ea_rlm_predecr_start:
+00001344  5448                     305      ADDA    #2, A0
+00001346  4243                     306      CLR     D3
+00001348  4246                     307      CLR     D6
+0000134A  4247                     308      CLR     D7
+0000134C  3E10                     309      MOVE.W  (A0),   D7
+0000134E  163C 0000                310      MOVE.B  #0, D3
+00001352                           311  ea_rlm_pd_data_loop_start:
+00001352  E34F                     312      LSL.W   #1, D7
+00001354  6400 009A                313      BCC     ea_rlm_pd_data_loop_end
+00001358  0C06 0000                314      CMPI.B  #0, D6
+0000135C  6700 0006                315      BEQ     ea_rlm_pd_data_loop_noslash
+00001360  14FC 002F                316      MOVE.B  #'/', (A2)+
+00001364                           317  ea_rlm_pd_data_loop_noslash:
+00001364  1C3C 0001                318      MOVE.B  #1, D6
+00001368                           319  
+00001368  0C03 0000                320      CMPI.B  #0, D3
+0000136C  6600 0008                321      BNE     ea_rlm_pd_not_d0
+00001370  4EB9 0000160C            322      JSR     ea_d0
+00001376                           323  ea_rlm_pd_not_d0:
+00001376  0C03 0001                324      CMPI.B  #1, D3
+0000137A  6600 000C                325      BNE     ea_rlm_pd_not_d1
+0000137E  4EB9 00001616            326      JSR     ea_d1
+00001384  6000 006A                327      BRA     ea_rlm_pd_data_continue
+00001388                           328  ea_rlm_pd_not_d1:
+00001388  0C03 0002                329      CMPI.B  #2, D3
+0000138C  6600 000C                330      BNE     ea_rlm_pd_not_d2
+00001390  4EB9 00001620            331      JSR     ea_d2
+00001396  6000 0058                332      BRA     ea_rlm_pd_data_continue
+0000139A                           333  ea_rlm_pd_not_d2:
+0000139A  0C03 0003                334      CMPI.B  #3, D3
+0000139E  6600 000C                335      BNE     ea_rlm_pd_not_d3
+000013A2  4EB9 0000162A            336      JSR     ea_d3
+000013A8  6000 0046                337      BRA     ea_rlm_pd_data_continue
+000013AC                           338  ea_rlm_pd_not_d3:
+000013AC  0C03 0004                339      CMPI.B  #4, D3
+000013B0  6600 000C                340      BNE     ea_rlm_pd_not_d4
+000013B4  4EB9 00001634            341      JSR     ea_d4
+000013BA  6000 0034                342      BRA     ea_rlm_pd_data_continue
+000013BE                           343  ea_rlm_pd_not_d4:
+000013BE  0C03 0005                344      CMPI.B  #5, D3
+000013C2  6600 000C                345      BNE     ea_rlm_pd_not_d5
+000013C6  4EB9 0000163E            346      JSR     ea_d5
+000013CC  6000 0022                347      BRA     ea_rlm_pd_data_continue
+000013D0                           348  ea_rlm_pd_not_d5:
+000013D0  0C03 0006                349      CMPI.B  #6, D3
+000013D4  6600 000C                350      BNE     ea_rlm_pd_not_d6
+000013D8  4EB9 00001648            351      JSR     ea_d6
+000013DE  6000 0010                352      BRA     ea_rlm_pd_data_continue
+000013E2                           353  ea_rlm_pd_not_d6:
+000013E2  0C03 0007                354      CMPI.B  #7, D3
+000013E6  6600 0008                355      BNE     ea_rlm_pd_data_continue
+000013EA  4EB9 00001652            356      JSR     ea_d7
+000013F0                           357  
+000013F0                           358  ea_rlm_pd_data_continue:
+000013F0                           359  ea_rlm_pd_data_loop_end:
+000013F0  5203                     360      ADDQ.B  #1,     D3
+000013F2  0C03 0008                361      CMPI.B  #8,     D3
+000013F6  6D00 FF5A                362      BLT     ea_rlm_pd_data_loop_start
+000013FA                           363  
+000013FA  163C 0000                364      MOVE.B  #0,     D3
+000013FE                           365  
+000013FE                           366  
+000013FE                           367  ea_rlm_pd_addr_loop_start:
+000013FE  E34F                     368      LSL.W   #1, D7
+00001400  6400 009A                369      BCC     ea_rlm_pd_addr_loop_end
+00001404  0C06 0001                370      CMPI.B  #1, D6
+00001408  6600 0006                371      BNE     ea_rlm_pd_addr_loop_noslash
+0000140C  14FC 002F                372      MOVE.B  #'/', (A2)+
+00001410                           373  ea_rlm_pd_addr_loop_noslash:
+00001410  1C3C 0001                374      MOVE.B  #1, D6
+00001414                           375  
+00001414  0C03 0000                376      CMPI.B  #0, D3
+00001418  6600 0008                377      BNE     ea_rlm_pd_not_a0
+0000141C  4EB9 00001692            378      JSR     ea_a0
+00001422                           379  ea_rlm_pd_not_a0:
+00001422  0C03 0001                380      CMPI.B  #1, D3
+00001426  6600 000C                381      BNE     ea_rlm_pd_not_a1
+0000142A  4EB9 0000169C            382      JSR     ea_a1
+00001430  6000 006A                383      BRA     ea_rlm_pd_addr_continue
+00001434                           384  ea_rlm_pd_not_a1:
+00001434  0C03 0002                385      CMPI.B  #2, D3
+00001438  6600 000C                386      BNE     ea_rlm_pd_not_a2
+0000143C  4EB9 000016A6            387      JSR     ea_a2
+00001442  6000 0058                388      BRA     ea_rlm_pd_addr_continue
+00001446                           389  ea_rlm_pd_not_a2:
+00001446  0C03 0003                390      CMPI.B  #3, D3
+0000144A  6600 000C                391      BNE     ea_rlm_pd_not_a3
+0000144E  4EB9 000016B0            392      JSR     ea_a3
+00001454  6000 0046                393      BRA     ea_rlm_pd_addr_continue
+00001458                           394  ea_rlm_pd_not_a3:
+00001458  0C03 0004                395      CMPI.B  #4, D3
+0000145C  6600 000C                396      BNE     ea_rlm_pd_not_a4
+00001460  4EB9 000016BA            397      JSR     ea_a4
+00001466  6000 0034                398      BRA     ea_rlm_pd_addr_continue
+0000146A                           399  ea_rlm_pd_not_a4:
+0000146A  0C03 0005                400      CMPI.B  #5, D3
+0000146E  6600 000C                401      BNE     ea_rlm_pd_not_a5
+00001472  4EB9 000016C4            402      JSR     ea_a5
+00001478  6000 0022                403      BRA     ea_rlm_pd_addr_continue
+0000147C                           404  ea_rlm_pd_not_a5:
+0000147C  0C03 0006                405      CMPI.B  #6, D3
+00001480  6600 000C                406      BNE     ea_rlm_pd_not_a6
+00001484  4EB9 000016CE            407      JSR     ea_a6
+0000148A  6000 0010                408      BRA     ea_rlm_pd_addr_continue
+0000148E                           409  ea_rlm_pd_not_a6:
+0000148E  0C03 0007                410      CMPI.B  #7, D3
+00001492  6600 0008                411      BNE     ea_rlm_pd_addr_continue
+00001496  4EB9 000016D8            412      JSR     ea_a7
+0000149C                           413  ea_rlm_pd_addr_continue:
+0000149C                           414  ea_rlm_pd_addr_loop_end:
+0000149C  5203                     415      ADDQ.B  #1,     D3
+0000149E  0C03 0008                416      CMPI.B  #8,     D3
+000014A2  6D00 FF5A                417      BLT     ea_rlm_pd_addr_loop_start
+000014A6                           418  
+000014A6  4E75                     419      RTS
+000014A8                           420  
+000014A8                           421  ea_rlm_postincr_start:
+000014A8  5448                     422      ADDA    #2, A0
+000014AA  4243                     423      CLR     D3
+000014AC  4246                     424      CLR     D6
+000014AE  4247                     425      CLR     D7
+000014B0  3E10                     426      MOVE.W  (A0),   D7
+000014B2                           427  
+000014B2  163C 0007                428      MOVE.B  #7,     D3
+000014B6                           429  ea_rlm_pi_addr_loop_start:
+000014B6  E34F                     430      LSL.W   #1, D7
+000014B8  6400 009A                431      BCC     ea_rlm_pi_addr_loop_end
+000014BC  0C06 0001                432      CMPI.B  #1, D6
+000014C0  6600 0006                433      BNE     ea_rlm_pi_addr_loop_noslash
+000014C4  14FC 002F                434      MOVE.B  #'/', (A2)+
+000014C8                           435  ea_rlm_pi_addr_loop_noslash:
+000014C8  1C3C 0001                436      MOVE.B  #1, D6
+000014CC                           437  
+000014CC  0C03 0000                438      CMPI.B  #0, D3
+000014D0  6600 0008                439      BNE     ea_rlm_pi_not_a0
+000014D4  4EB9 00001692            440      JSR     ea_a0
+000014DA                           441  ea_rlm_pi_not_a0:
+000014DA  0C03 0001                442      CMPI.B  #1, D3
+000014DE  6600 000C                443      BNE     ea_rlm_pi_not_a1
+000014E2  4EB9 0000169C            444      JSR     ea_a1
+000014E8  6000 006A                445      BRA     ea_rlm_pi_addr_continue
+000014EC                           446  ea_rlm_pi_not_a1:
+000014EC  0C03 0002                447      CMPI.B  #2, D3
+000014F0  6600 000C                448      BNE     ea_rlm_pi_not_a2
+000014F4  4EB9 000016A6            449      JSR     ea_a2
+000014FA  6000 0058                450      BRA     ea_rlm_pi_addr_continue
+000014FE                           451  ea_rlm_pi_not_a2:
+000014FE  0C03 0003                452      CMPI.B  #3, D3
+00001502  6600 000C                453      BNE     ea_rlm_pi_not_a3
+00001506  4EB9 000016B0            454      JSR     ea_a3
+0000150C  6000 0046                455      BRA     ea_rlm_pi_addr_continue
+00001510                           456  ea_rlm_pi_not_a3:
+00001510  0C03 0004                457      CMPI.B  #4, D3
+00001514  6600 000C                458      BNE     ea_rlm_pi_not_a4
+00001518  4EB9 000016BA            459      JSR     ea_a4
+0000151E  6000 0034                460      BRA     ea_rlm_pi_addr_continue
+00001522                           461  ea_rlm_pi_not_a4:
+00001522  0C03 0005                462      CMPI.B  #5, D3
+00001526  6600 000C                463      BNE     ea_rlm_pi_not_a5
+0000152A  4EB9 000016C4            464      JSR     ea_a5
+00001530  6000 0022                465      BRA     ea_rlm_pi_addr_continue
+00001534                           466  ea_rlm_pi_not_a5:
+00001534  0C03 0006                467      CMPI.B  #6, D3
+00001538  6600 000C                468      BNE     ea_rlm_pi_not_a6
+0000153C  4EB9 000016CE            469      JSR     ea_a6
+00001542  6000 0010                470      BRA     ea_rlm_pi_addr_continue
+00001546                           471  ea_rlm_pi_not_a6:
+00001546  0C03 0007                472      CMPI.B  #7, D3
+0000154A  6600 0008                473      BNE     ea_rlm_pi_addr_continue
+0000154E  4EB9 000016D8            474      JSR     ea_a7
+00001554                           475  ea_rlm_pi_addr_continue:
+00001554                           476  ea_rlm_pi_addr_loop_end:
+00001554  5303                     477      SUBQ.B  #1,     D3
+00001556  0C03 0000                478      CMPI.B  #0,     D3
+0000155A  6C00 FF5A                479      BGE     ea_rlm_pi_addr_loop_start
+0000155E                           480  
+0000155E  163C 0007                481      MOVE.B  #7, D3
+00001562                           482  ea_rlm_pi_data_loop_start:
+00001562  E34F                     483      LSL.W   #1, D7
+00001564  6400 009A                484      BCC     ea_rlm_pi_data_loop_end
+00001568  0C06 0000                485      CMPI.B  #0, D6
+0000156C  6700 0006                486      BEQ     ea_rlm_pi_data_loop_noslash
+00001570  14FC 002F                487      MOVE.B  #'/', (A2)+
+00001574                           488  ea_rlm_pi_data_loop_noslash:
+00001574  1C3C 0001                489      MOVE.B  #1, D6
+00001578                           490  
+00001578  0C03 0000                491      CMPI.B  #0, D3
+0000157C  6600 0008                492      BNE     ea_rlm_pi_not_d0
+00001580  4EB9 0000160C            493      JSR     ea_d0
+00001586                           494  ea_rlm_pi_not_d0:
+00001586  0C03 0001                495      CMPI.B  #1, D3
+0000158A  6600 000C                496      BNE     ea_rlm_pi_not_d1
+0000158E  4EB9 00001616            497      JSR     ea_d1
+00001594  6000 006A                498      BRA     ea_rlm_pi_data_continue
+00001598                           499  ea_rlm_pi_not_d1:
+00001598  0C03 0002                500      CMPI.B  #2, D3
+0000159C  6600 000C                501      BNE     ea_rlm_pi_not_d2
+000015A0  4EB9 00001620            502      JSR     ea_d2
+000015A6  6000 0058                503      BRA     ea_rlm_pi_data_continue
+000015AA                           504  ea_rlm_pi_not_d2:
+000015AA  0C03 0003                505      CMPI.B  #3, D3
+000015AE  6600 000C                506      BNE     ea_rlm_pi_not_d3
+000015B2  4EB9 0000162A            507      JSR     ea_d3
+000015B8  6000 0046                508      BRA     ea_rlm_pi_data_continue
+000015BC                           509  ea_rlm_pi_not_d3:
+000015BC  0C03 0004                510      CMPI.B  #4, D3
+000015C0  6600 000C                511      BNE     ea_rlm_pi_not_d4
+000015C4  4EB9 00001634            512      JSR     ea_d4
+000015CA  6000 0034                513      BRA     ea_rlm_pi_data_continue
+000015CE                           514  ea_rlm_pi_not_d4:
+000015CE  0C03 0005                515      CMPI.B  #5, D3
+000015D2  6600 000C                516      BNE     ea_rlm_pi_not_d5
+000015D6  4EB9 0000163E            517      JSR     ea_d5
+000015DC  6000 0022                518      BRA     ea_rlm_pi_data_continue
+000015E0                           519  ea_rlm_pi_not_d5:
+000015E0  0C03 0006                520      CMPI.B  #6, D3
+000015E4  6600 000C                521      BNE     ea_rlm_pi_not_d6
+000015E8  4EB9 00001648            522      JSR     ea_d6
+000015EE  6000 0010                523      BRA     ea_rlm_pi_data_continue
+000015F2                           524  ea_rlm_pi_not_d6:
+000015F2  0C03 0007                525      CMPI.B  #7, D3
+000015F6  6600 0008                526      BNE     ea_rlm_pi_data_continue
+000015FA  4EB9 00001652            527      JSR     ea_d7
+00001600                           528  
+00001600                           529  ea_rlm_pi_data_continue:
+00001600                           530  ea_rlm_pi_data_loop_end:
+00001600  5303                     531      SUBQ.B  #1,     D3
+00001602  0C03 0000                532      CMPI.B  #0,     D3
+00001606  6C00 FF5A                533      BGE     ea_rlm_pi_data_loop_start
+0000160A                           534  
+0000160A  4E75                     535      RTS
+0000160C                           536  
+0000160C                           537  ********************************************
+0000160C                           538  *            EA DATA REGISTER              *
+0000160C                           539  ********************************************
+0000160C                           540  ea_d0:
+0000160C  14FC 0044                541      MOVE.B #'D', (A2)+
+00001610  14FC 0030                542      MOVE.B #'0', (A2)+
+00001614  4E75                     543      RTS
+00001616                           544  ea_d1:
+00001616  14FC 0044                545      MOVE.B #'D', (A2)+
+0000161A  14FC 0031                546      MOVE.B #'1', (A2)+
+0000161E  4E75                     547      RTS
+00001620                           548  ea_d2:
+00001620  14FC 0044                549      MOVE.B #'D', (A2)+
+00001624  14FC 0032                550      MOVE.B #'2', (A2)+
+00001628  4E75                     551      RTS
+0000162A                           552  ea_d3:
+0000162A  14FC 0044                553      MOVE.B #'D', (A2)+
+0000162E  14FC 0033                554      MOVE.B #'3', (A2)+
+00001632  4E75                     555      RTS
+00001634                           556  ea_d4:
+00001634  14FC 0044                557      MOVE.B #'D', (A2)+
+00001638  14FC 0034                558      MOVE.B #'4', (A2)+
+0000163C  4E75                     559      RTS
+0000163E                           560  ea_d5:
+0000163E  14FC 0044                561      MOVE.B #'D', (A2)+
+00001642  14FC 0035                562      MOVE.B #'5', (A2)+
+00001646  4E75                     563      RTS
+00001648                           564  ea_d6:
+00001648  14FC 0044                565      MOVE.B #'D', (A2)+
+0000164C  14FC 0036                566      MOVE.B #'6', (A2)+
+00001650  4E75                     567      RTS
+00001652                           568  ea_d7:
+00001652  14FC 0044                569      MOVE.B #'D', (A2)+
+00001656  14FC 0037                570      MOVE.B #'7', (A2)+
+0000165A  4E75                     571      RTS
+0000165C                           572  
+0000165C                           573  ea_data_register:
+0000165C  1801                     574      MOVE.B  D1, D4
+0000165E  0244 0007                575      ANDI    #7, D4
+00001662  0C04 0000                576      CMPI.B  #0, D4
+00001666  67A4                     577      BEQ     ea_d0
+00001668  0C04 0001                578      CMPI.B  #1, D4
+0000166C  67A8                     579      BEQ     ea_d1
+0000166E  0C04 0002                580      CMPI.B  #2, D4
+00001672  67AC                     581      BEQ     ea_d2
+00001674  0C04 0003                582      CMPI.B  #3, D4
+00001678  67B0                     583      BEQ     ea_d3
+0000167A  0C04 0004                584      CMPI.B  #4, D4
+0000167E  67B4                     585      BEQ     ea_d4
+00001680  0C04 0005                586      CMPI.B  #5, D4
+00001684  67B8                     587      BEQ     ea_d5
+00001686  0C04 0006                588      CMPI.B  #6, D4
+0000168A  67BC                     589      BEQ     ea_d6
+0000168C  0C04 0007                590      CMPI.B  #7, D4
+00001690  67C0                     591      BEQ     ea_d7
+00001692                           592  
+00001692                           593  ********************************************
+00001692                           594  *            EA ADDRESS REGISTER           *
+00001692                           595  ********************************************
+00001692                           596  ea_a0:
+00001692  14FC 0041                597      MOVE.B #'A', (A2)+
+00001696  14FC 0030                598      MOVE.B #'0', (A2)+
+0000169A  4E75                     599      RTS
+0000169C                           600  ea_a1:
+0000169C  14FC 0041                601      MOVE.B #'A', (A2)+
+000016A0  14FC 0031                602      MOVE.B #'1', (A2)+
+000016A4  4E75                     603      RTS
+000016A6                           604  ea_a2:
+000016A6  14FC 0041                605      MOVE.B #'A', (A2)+
+000016AA  14FC 0032                606      MOVE.B #'2', (A2)+
+000016AE  4E75                     607      RTS
+000016B0                           608  ea_a3:
+000016B0  14FC 0041                609      MOVE.B #'A', (A2)+
+000016B4  14FC 0033                610      MOVE.B #'3', (A2)+
+000016B8  4E75                     611      RTS
+000016BA                           612  ea_a4:
+000016BA  14FC 0041                613      MOVE.B #'A', (A2)+
+000016BE  14FC 0034                614      MOVE.B #'4', (A2)+
+000016C2  4E75                     615      RTS
+000016C4                           616  ea_a5:
+000016C4  14FC 0041                617      MOVE.B #'A', (A2)+
+000016C8  14FC 0035                618      MOVE.B #'5', (A2)+
+000016CC  4E75                     619      RTS
+000016CE                           620  ea_a6:
+000016CE  14FC 0041                621      MOVE.B #'A', (A2)+
+000016D2  14FC 0036                622      MOVE.B #'6', (A2)+
+000016D6  4E75                     623      RTS
+000016D8                           624  ea_a7:
+000016D8  14FC 0041                625      MOVE.B #'A', (A2)+
+000016DC  14FC 0037                626      MOVE.B #'7', (A2)+
+000016E0  4E75                     627      RTS
+000016E2                           628  
+000016E2                           629  ea_address_register:
+000016E2  1801                     630      MOVE.B  D1, D4
+000016E4  0244 0007                631      ANDI    #7, D4
+000016E8  0C04 0000                632      CMPI.B  #0, D4
+000016EC  67A4                     633      BEQ     ea_a0
+000016EE  0C04 0001                634      CMPI.B  #1, D4
+000016F2  67A8                     635      BEQ     ea_a1
+000016F4  0C04 0002                636      CMPI.B  #2, D4
+000016F8  67AC                     637      BEQ     ea_a2
+000016FA  0C04 0003                638      CMPI.B  #3, D4
+000016FE  67B0                     639      BEQ     ea_a3
+00001700  0C04 0004                640      CMPI.B  #4, D4
+00001704  67B4                     641      BEQ     ea_a4
+00001706  0C04 0005                642      CMPI.B  #5, D4
+0000170A  67B8                     643      BEQ     ea_a5
+0000170C  0C04 0006                644      CMPI.B  #6, D4
+00001710  67BC                     645      BEQ     ea_a6
+00001712  0C04 0007                646      CMPI.B  #7, D4
+00001716  67C0                     647      BEQ     ea_a7
+00001718                           648  ********************************************
+00001718                           649  *            EA ADDRESS                    *
+00001718                           650  ********************************************
+00001718                           651  ea_address:
+00001718  14FC 0028                652      MOVE.B  #'(',   (A2)+
+0000171C  1801                     653      MOVE.B  D1,     D4
+0000171E  0244 0007                654      ANDI    #$7,    D4
+00001722  0C04 0000                655      CMPI.B  #0, D4
+00001726  6600 0006                656      BNE     ea_address_not_a0
+0000172A  4EB8 1692                657      JSR     ea_a0
+0000172E                           658  ea_address_not_a0:
+0000172E  0C04 0001                659      CMPI.B  #1, D4
+00001732  6600 000A                660      BNE     ea_address_not_a1
+00001736  4EB8 169C                661      JSR     ea_a1
+0000173A  6000 005E                662      BRA     ea_address_continue
+0000173E                           663  ea_address_not_a1:
+0000173E  0C04 0002                664      CMPI.B  #2, D4
+00001742  6600 000A                665      BNE     ea_address_not_a2
+00001746  4EB8 16A6                666      JSR     ea_a2
+0000174A  6000 004E                667      BRA     ea_address_continue
+0000174E                           668  ea_address_not_a2:
+0000174E  0C04 0003                669      CMPI.B  #3, D4
+00001752  6600 000A                670      BNE     ea_address_not_a3
+00001756  4EB8 16B0                671      JSR     ea_a3
+0000175A  6000 003E                672      BRA     ea_address_continue
+0000175E                           673  ea_address_not_a3:
+0000175E  0C04 0004                674      CMPI.B  #4, D4
+00001762  6600 000A                675      BNE     ea_address_not_a4
+00001766  4EB8 16BA                676      JSR     ea_a4
+0000176A  6000 002E                677      BRA     ea_address_continue
+0000176E                           678  ea_address_not_a4:
+0000176E  0C04 0005                679      CMPI.B  #5, D4
+00001772  6600 000A                680      BNE     ea_address_not_a5
+00001776  4EB8 16C4                681      JSR     ea_a5
+0000177A  6000 001E                682      BRA     ea_address_continue
+0000177E                           683  ea_address_not_a5:
+0000177E  0C04 0006                684      CMPI.B  #6, D4
+00001782  6600 000A                685      BNE     ea_address_not_a6
+00001786  4EB8 16CE                686      JSR     ea_a6
+0000178A  6000 000E                687      BRA     ea_address_continue
+0000178E                           688  ea_address_not_a6:
+0000178E  0C04 0007                689      CMPI.B  #7, D4
+00001792  6600 0006                690      BNE     ea_address_continue
+00001796  4EB8 16D8                691      JSR     ea_a7
+0000179A                           692  ea_address_continue:
+0000179A  14FC 0029                693      MOVE.B  #')', (A2)+
+0000179E  4E75                     694      RTS
+000017A0                           695  
+000017A0                           696  
+000017A0                           697  
+000017A0                           698  
+000017A0                           699  ********************************************
+000017A0                           700  *             SIZE PARSERS                 *
+000017A0                           701  ********************************************
+000017A0                           702  light_purple_size:
+000017A0  14FC 002E                703      MOVE.B  #'.', (A2)+
+000017A4  E24B                     704      LSR     #1, D3
+000017A6  6500 0012                705      BCS     size_w
+000017AA  E24B                     706      LSR     #1, D3
+000017AC  6500 0012                707      BCS     size_l
+000017B0  6000 0002                708      BRA     size_b
+000017B4                           709  
+000017B4                           710  size_b:
+000017B4  14FC 0042                711      MOVE.B  #'B', (A2)+
+000017B8  4E75                     712      RTS
+000017BA                           713  size_w:
+000017BA  14FC 0057                714      MOVE.B  #'W', (A2)+
+000017BE  4E75                     715      RTS
+000017C0                           716  size_l:
+000017C0  14FC 004C                717      MOVE.B  #'L', (A2)+
+000017C4  4E75                     718      RTS
+000017C6                           719  ********************************************
+000017C6                           720  *                                          *
+000017C6                           721  *             OP CODE PARSER               *
+000017C6                           722  *                                          *
+000017C6                           723  ********************************************
+000017C6                           724  
+000017C6                           725  code0000:
+000017C6  3A10                     726      MOVE.W  (A0), D5          ; Move current instruction into D5
+000017C8  1205                     727      MOVE.B  D5, D1          ; Move last 8 bits into effective addressing register
+000017CA  E04D                     728      LSR     #8, D5          ; Put specific op into LSBs
+000017CC  0C45 0000                729      CMPI    #0, D5          ; ORI
+000017D0  6700 017A                730      BEQ     op_ori
+000017D4  0C45 0002                731      CMPI    #2, D5          ; ANDI
+000017D8  6700 0188                732      BEQ     op_andi
+000017DC  0C45 0004                733      CMPI    #4, D5          ; SUBI
+000017E0  6700 019A                734      BEQ     op_subi
+000017E4  0C45 0006                735      CMPI    #6, D5          ; ADDI
+000017E8  6700 01AC                736      BEQ     op_addi
+000017EC  0C45 000A                737      CMPI    #$A, D5          ; EORI
+000017F0  6700 01BE                738      BEQ     op_eori
+000017F4  0C45 000C                739      CMPI    #$C, D5          ; CMPI
+000017F8  6700 01D0                740      BEQ     op_cmpi
+000017FC  6000 0A50                741      BRA     op_unsupported
+00001800                           742  
+00001800                           743  code0001:                   ; MOVE(A).B
+00001800  6000 01E2                744      BRA     op_move
+00001804                           745  code0010:                   ; MOVA(A).L
+00001804  6000 01DE                746      BRA     op_move
+00001808                           747  code0011:                   ; MOVE(A).W
+00001808  6000 01DA                748      BRA     op_move
+0000180C                           749  
+0000180C                           750  code0100:
+0000180C  3A10                     751      MOVE.W  (A0), D5        ;moves instruction to temp register (D5)
+0000180E  3205                     752      MOVE.W  D5, D1          ;loads into EA register
+00001810  E04D                     753      LSR     #8, D5          ;gets the first 8 bits
+00001812  0C05 0042                754      CMPI.B  #$42, D5        ;0100 0010
+00001816  6700 0256                755      BEQ     op_clr          ;CLR
+0000181A  0C05 0046                756      CMPI.B  #$46, D5        ; 0100 0110
+0000181E  6700 025E                757      BEQ     op_not          ;NOT
+00001822  3A01                     758      MOVE.W  D1, D5          ;resets temp register
+00001824  E64D                     759      LSR.W   #3, D5          ;gets first 13 bits
+00001826  0205 0007                760      ANDI.B  #$7, D5         ;clears size bit
+0000182A  0C45 0900                761      CMPI.W  #$900, D5       ;0100 1000
+0000182E  6700 0270                762      BEQ     op_ext          ;EXT
+00001832  3A01                     763      MOVE.W  D1, D5          ;resets d5 to full instruction
+00001834  E84D                     764      LSR     #4, D5          ;get first 12 bits
+00001836  0C05 00E4                765      CMPI.B  #$E4, D5        ; 0100 1110
+0000183A  6700 02A0                766      BEQ     op_trap         ;TRAP
+0000183E  E44D                     767      LSR     #2, D5          ;gets the first 10 bits
+00001840  0205 0007                768      ANDI.B  #$7, D5         ;clear size bit
+00001844  0C05 0007                769      CMPI.B  #$7, D5
+00001848  6700 03CA                770      BEQ     op_lea          ;LEA
+0000184C  3A01                     771      MOVE.W  D1, D5
+0000184E  EC4D                     772      LSR     #6, D5
+00001850                           773  * Constant OP codes (NOP, STOP, RTE, RTS)
+00001850  0C50 4E71                774      CMPI.W  #$4E71, (A0)
+00001854  6700 02B2                775      BEQ     op_nop
+00001858  0C50 4E72                776      CMPI.W  #$4E72, (A0)
+0000185C  6700 02BC                777      BEQ     op_stop
+00001860  0C50 4E73                778      CMPI.W  #$4E73, (A0)
+00001864  6700 02D8                779      BEQ     op_rte
+00001868  0C50 4E75                780      CMPI.W  #$4E75, (A0)
+0000186C  6700 02E2                781      BEQ     op_rts
+00001870  0C45 013A                782      CMPI.W  #$13A,   D5
+00001874  6700 02EC                783      BEQ     op_jsr
+00001878  0C45 013B                784      CMPI.W  #$13B,   D5
+0000187C  6700 02FA                785      BEQ     op_jmp
+00001880  E24D                     786      LSR     #1, D5
+00001882  0205 0001                787      ANDI.B  #1, D5
+00001886  0C05 0001                788      CMPI.B  #$1, D5
+0000188A  6700 0306                789      BEQ     op_movem
+0000188E                           790  
+0000188E                           791  code0101:
+0000188E  3A10                     792      MOVE.W (A0), D5
+00001890  3205                     793      MOVE.W  D5, D1
+00001892  E04D                     794      LSR.W   #8,  D5
+00001894  E24D                     795      LSR.W   #1,  D5
+00001896  6500 03E4                796      BCS     op_subq
+0000189A  6000 039A                797      BRA     op_addq
+0000189E                           798  
+0000189E                           799  code0110:
+0000189E  3A10                     800      MOVE.W  (A0), D5
+000018A0  E04D                     801      LSR.W   #8,   D5
+000018A2  0C05 0060                802      CMPI.B  #$60,  D5
+000018A6  6700 041A                803      BEQ     op_bra
+000018AA  0C05 0061                804      CMPI.B  #$61,  D5
+000018AE  6700 042E                805      BEQ     op_bsr
+000018B2  6000 0446                806      BRA     op_bcc
+000018B6                           807  
+000018B6                           808  code0111:
+000018B6  6000 05B4                809      BRA     op_moveq
+000018BA                           810  
+000018BA                           811  code1000:
+000018BA  3A10                     812      MOVE.W (A0), D5
+000018BC  3205                     813      MOVE.W  D5, D1
+000018BE  EE4D                     814      LSR.W   #7,  D5
+000018C0  6400 05EC                815      BCC     op_or
+000018C4  E24D                     816      LSR.W   #1,  D5
+000018C6  6400 05E6                817      BCC     op_or
+000018CA  E24D                     818      LSR.W   #1,  D5
+000018CC  6400 064C                819      BCC     op_divu
+000018D0  6000 0612                820      BRA     op_divs
+000018D4                           821  
+000018D4                           822  code1001:
+000018D4  3205                     823      MOVE.W  D5, D1
+000018D6  6000 0678                824      BRA     op_sub
+000018DA                           825  
+000018DA                           826  code1011:
+000018DA  3A10                     827      MOVE.W  (A0), D5
+000018DC  3205                     828      MOVE.W  D5, D1
+000018DE  E14D                     829      LSL.W   #8,   D5
+000018E0  6500 06A8                830      BCS     op_eor
+000018E4  6000 06DE                831      BRA     op_cmp
+000018E8                           832  
+000018E8                           833  code1100:
+000018E8  3A10                     834      MOVE.W (A0), D5
+000018EA  3205                     835      MOVE.W  D5, D1
+000018EC  EE4D                     836      LSR.W  #7,  D5
+000018EE  6400 070E                837      BCC     op_and
+000018F2  E24D                     838      LSR.W   #1, D5
+000018F4  6400 0708                839      BCC     op_and
+000018F8  E24D                     840      LSR.W   #1, D5
+000018FA  6400 073C                841      BCC     op_mulu
+000018FE  6000 0776                842      BRA     op_muls
+00001902                           843  
+00001902                           844  code1101:
+00001902  3A10                     845      MOVE.W  (A0), D5
+00001904  3205                     846      MOVE.W  D5, D1
+00001906  EE4D                     847      LSR.W   #7, D5
+00001908  6400 07AA                848      BCC     op_add
+0000190C  E24D                     849      LSR.W   #1, D5
+0000190E  6400 07A4                850      BCC     op_add
+00001912  6000 07DA                851      BRA     op_adda
+00001916                           852  
+00001916                           853  code1110:
+00001916  3A10                     854      MOVE.W  (A0), D5
+00001918  EE4D                     855      LSR.W   #7, D5
+0000191A  6400 000C                856      BCC     code_shift_reg
+0000191E  E24D                     857      LSR.W   #1, D5
+00001920  6400 0006                858      BCC     code_shift_reg
+00001924  6000 0014                859      BRA     code_shift_ea
+00001928                           860  
+00001928                           861  
+00001928                           862  code_shift_reg:
+00001928  3A10                     863      MOVE.W  (A0), D5
+0000192A  E84D                     864      LSR.W   #4, D5
+0000192C  6400 081E                865      BCC     op_asx_reg
+00001930  E24D                     866      LSR.W   #1, D5
+00001932  6400 0824                867      BCC     op_lsx_reg
+00001936  6000 0838                868      BRA     op_rox_reg
+0000193A                           869  
+0000193A                           870  code_shift_ea:
+0000193A  3A10                     871      MOVE.W  (A0), D5
+0000193C  ED4D                     872      LSL.W   #6, D5
+0000193E  6500 083C                873      BCS     op_rox_ea
+00001942  E34D                     874      LSL.W   #1, D5
+00001944  6500 081E                875      BCS     op_lsx_ea
+00001948  6000 07F6                876      BRA     op_asx_ea
+0000194C                           877  
+0000194C                           878  ********************************************
+0000194C                           879  *                 OP 0000                  *
+0000194C                           880  ********************************************
+0000194C                           881  
+0000194C                           882  op_ori:
+0000194C  14FC 004F                883      MOVE.B  #'O', (A2)+
+00001950  14FC 0052                884      MOVE.B  #'R', (A2)+
+00001954  14FC 0049                885      MOVE.B  #'I', (A2)+
+00001958  4EB8 10CA                886      JSR     ea_immediate_start
+0000195C  4EF9 0000222C            887      JMP     op_finish
+00001962                           888  
+00001962                           889  op_andi:
+00001962  14FC 0041                890      MOVE.B  #'A', (A2)+
+00001966  14FC 004E                891      MOVE.B  #'N', (A2)+
+0000196A  14FC 0044                892      MOVE.B  #'D', (A2)+
+0000196E  14FC 0049                893      MOVE.B  #'I', (A2)+
+00001972  4EB8 10CA                894      JSR     ea_immediate_start
+00001976  4EF9 0000222C            895      JMP     op_finish
+0000197C                           896  
+0000197C                           897  op_subi:
+0000197C  14FC 0053                898      MOVE.B  #'S', (A2)+
+00001980  14FC 0055                899      MOVE.B  #'U', (A2)+
+00001984  14FC 0042                900      MOVE.B  #'B', (A2)+
+00001988  14FC 0049                901      MOVE.B  #'I', (A2)+
+0000198C  4EB8 10CA                902      JSR     ea_immediate_start
+00001990  4EF9 0000222C            903      JMP     op_finish
+00001996                           904  
+00001996                           905  op_addi:
+00001996  14FC 0041                906      MOVE.B  #'A', (A2)+
+0000199A  14FC 0044                907      MOVE.B  #'D', (A2)+
+0000199E  14FC 0044                908      MOVE.B  #'D', (A2)+
+000019A2  14FC 0049                909      MOVE.B  #'I', (A2)+
+000019A6  4EB8 10CA                910      JSR     ea_immediate_start
+000019AA  4EF9 0000222C            911      JMP     op_finish
+000019B0                           912  
+000019B0                           913  op_eori:
+000019B0  14FC 0045                914      MOVE.B  #'E', (A2)+
+000019B4  14FC 004F                915      MOVE.B  #'O', (A2)+
+000019B8  14FC 0052                916      MOVE.B  #'R', (A2)+
+000019BC  14FC 0049                917      MOVE.B  #'I', (A2)+
+000019C0  4EB8 10CA                918      JSR     ea_immediate_start
+000019C4  4EF9 0000222C            919      JMP     op_finish
+000019CA                           920  
+000019CA                           921  op_cmpi:
+000019CA  14FC 0043                922      MOVE.B  #'C', (A2)+
+000019CE  14FC 004D                923      MOVE.B  #'M', (A2)+
+000019D2  14FC 0050                924      MOVE.B  #'P', (A2)+
+000019D6  14FC 0049                925      MOVE.B  #'I', (A2)+
+000019DA  4EB8 10CA                926      JSR     ea_immediate_start
+000019DE  4EF9 0000222C            927      JMP     op_finish
+000019E4                           928  
+000019E4                           929  ********************************************
+000019E4                           930  *                 OP 00xx                  *
+000019E4                           931  ********************************************
+000019E4                           932  
+000019E4                           933  op_move:
+000019E4  14FC 004D                934      MOVE.B  #'M', (A2)+
+000019E8  14FC 004F                935      MOVE.B  #'O', (A2)+
+000019EC  14FC 0056                936      MOVE.B  #'V', (A2)+
+000019F0  14FC 0045                937      MOVE.B  #'E', (A2)+
+000019F4  3210                     938      MOVE.W  (A0), D1              ; Move address into EA register
+000019F6  3C10                     939      MOVE.W  (A0), D6              ; Move address into separate register for size parsing - ??yyyyyy
+000019F8  EC4E                     940      LSR     #6, D6              ; Shift size into position for movement into D1
+000019FA  1E06                     941      MOVE.B  D6, D7
+000019FC  0207 0007                942      ANDI.B  #7, D7
+00001A00  0C07 0001                943      CMPI.B  #1, D7
+00001A04  6600 0008                944      BNE     continue_move_a
+00001A08  4EB9 00001A68            945      JSR     op_movea
+00001A0E                           946  continue_move_a:
+00001A0E  14FC 002E                947      MOVE.B  #'.', (A2)+
+00001A12  3610                     948      MOVE.W  (A0), D3
+00001A14  E04B                     949      LSR     #8, D3
+00001A16  E84B                     950      LSR     #4, D3
+00001A18  0C03 0001                951      CMPI.B  #1, D3
+00001A1C  6600 0006                952      BNE    dark_purple_sizing1
+00001A20  4EB8 17B4                953      JSR     size_b
+00001A24                           954  dark_purple_sizing1:
+00001A24  0C03 0003                955      CMPI.B  #3, D3
+00001A28  6600 0006                956      BNE     dark_purple_sizing2
+00001A2C  4EB8 17BA                957      JSR     size_w
+00001A30                           958  dark_purple_sizing2:
+00001A30  0C03 0002                959      CMPI.B  #2, D3
+00001A34  6600 0006                960      BNE     dark_purple_sizing3
+00001A38  4EB8 17C0                961      JSR     size_l
+00001A3C                           962  dark_purple_sizing3:
+00001A3C  14FC 0020                963      MOVE.B    #' ', (A2)+
+00001A40  4EB8 1082                964      JSR     ea_start
+00001A44  EC49                     965      LSR.W     #6, D1
+00001A46  1E01                     966      MOVE.B    D1, D7
+00001A48  E60F                     967      LSR.B     #3, D7
+00001A4A  E709                     968      LSL.B     #3, D1
+00001A4C  0247 0007                969      ANDI      #$7, D7
+00001A50  0241 0038                970      ANDI      #$38, D1
+00001A54  8247                     971      OR        D7, D1
+00001A56  E40F                     972      LSR.B     #2, D7
+00001A58  14FC 002C                973      MOVE.B    #',', (A2)+
+00001A5C  14FC 0020                974      MOVE.B    #' ', (A2)+
+00001A60  4EB8 1082                975      JSR     ea_start                           ;MOVEA
+00001A64  6000 07C6                976      BRA     op_finish
+00001A68                           977  op_movea:
+00001A68  14FC 0041                978      MOVE.B  #'A', (A2)+
+00001A6C  4E75                     979      RTS
+00001A6E                           980  
+00001A6E                           981  
+00001A6E                           982  ********************************************
+00001A6E                           983  *                 OP 0100                  *
+00001A6E                           984  ********************************************
+00001A6E                           985  
+00001A6E                           986  op_clr:
+00001A6E  14FC 0043                987      MOVE.B  #'C', (A2)+
+00001A72  14FC 004C                988      MOVE.B  #'L', (A2)+
+00001A76  14FC 0052                989      MOVE.B  #'R', (A2)+
+00001A7A  6000 000E                990      BRA     op_not_clr_continue
+00001A7E                           991  op_not:
+00001A7E  14FC 004E                992      MOVE.B  #'N', (A2)+
+00001A82  14FC 004F                993      MOVE.B  #'O', (A2)+
+00001A86  14FC 0054                994      MOVE.B  #'T', (A2)+
+00001A8A                           995  op_not_clr_continue:
+00001A8A  3610                     996      MOVE.W  (A0), D3
+00001A8C  EC4B                     997      LSR     #6, D3
+00001A8E  4EB8 17A0                998      JSR     light_purple_size            ; Move EA of instruction into EA register
+00001A92  14FC 0020                999      MOVE.B  #' ', (A2)+
+00001A96  4EB8 1082               1000      JSR     ea_start
+00001A9A  4EF9 0000222C           1001      JMP     op_finish
+00001AA0                          1002  op_ext:
+00001AA0  14FC 0045               1003      MOVE.B  #'E', (A2)+
+00001AA4  14FC 0058               1004      MOVE.B  #'X', (A2)+
+00001AA8  14FC 0054               1005      MOVE.B  #'T', (A2)+
+00001AAC  14FC 002E               1006      MOVE.B  #'.', (A2)+
+00001AB0  3A10                    1007      MOVE.W  (A0), D5
+00001AB2  EE0D                    1008      LSR.B   #7,   D5
+00001AB4  6400 0006               1009      BCC     opext_size_word
+00001AB8  6000 000A               1010      BRA     opext_size_long
+00001ABC                          1011  
+00001ABC                          1012  opext_size_word:
+00001ABC  14FC 0057               1013      MOVE.B  #'W',   (A2)+
+00001AC0  6000 000A               1014      BRA     opext_continue
+00001AC4                          1015  
+00001AC4                          1016  opext_size_long:
+00001AC4  14FC 004C               1017      MOVE.B  #'L',   (A2)+
+00001AC8  6000 0002               1018      BRA     opext_continue
+00001ACC                          1019  
+00001ACC                          1020  opext_continue:
+00001ACC  14FC 0020               1021      MOVE.B  #' ', (A2)+
+00001AD0  1610                    1022      MOVE.B  (A0), D3
+00001AD2  4EB8 1082               1023      JSR     ea_start
+00001AD6  4EF9 0000222C           1024      JMP     op_finish
+00001ADC                          1025  
+00001ADC                          1026  
+00001ADC                          1027  op_trap:
+00001ADC  14FC 0054               1028      MOVE.B  #'T', (A2)+
+00001AE0  14FC 0052               1029      MOVE.B  #'R', (A2)+
+00001AE4  14FC 0041               1030      MOVE.B  #'A', (A2)+
+00001AE8  14FC 0050               1031      MOVE.B  #'P', (A2)+
+00001AEC  14FC 0020               1032      MOVE.B  #' ', (A2)+
+00001AF0  14FC 0023               1033      MOVE.B  #'#', (A2)+
+00001AF4  3610                    1034      MOVE.W  (A0),   D3
+00001AF6  C6BC 0000000F           1035      AND.L   #$0F,   D3
+00001AFC  4EB9 00002252           1036      JSR     int_to_ascii
+00001B02  4EF9 0000222C           1037      JMP     op_finish
+00001B08                          1038  
+00001B08                          1039  op_nop:
+00001B08  14FC 004E               1040      MOVE.B  #'N', (A2)+
+00001B0C  14FC 004F               1041      MOVE.B  #'O', (A2)+
+00001B10  14FC 0050               1042      MOVE.B  #'P', (A2)+
+00001B14  4EF9 0000222C           1043      JMP     op_finish
+00001B1A                          1044  op_stop:
+00001B1A  14FC 0053               1045      MOVE.B  #'S', (A2)+
+00001B1E  14FC 0054               1046      MOVE.B  #'T', (A2)+
+00001B22  14FC 004F               1047      MOVE.B  #'O', (A2)+
+00001B26  14FC 0050               1048      MOVE.B  #'P', (A2)+
+00001B2A  14FC 0020               1049      MOVE.B  #' ', (A2)+
+00001B2E  5448                    1050      ADDA    #2, A0
+00001B30  3610                    1051      MOVE.W  (A0), D3
+00001B32  4EB9 00002252           1052      JSR     int_to_ascii
+00001B38  4EF9 0000222C           1053      JMP     op_finish
+00001B3E                          1054  op_rte:
+00001B3E  14FC 0052               1055      MOVE.B  #'R', (A2)+
+00001B42  14FC 0054               1056      MOVE.B  #'T', (A2)+
+00001B46  14FC 0045               1057      MOVE.B  #'E', (A2)+
+00001B4A  4EF9 0000222C           1058      JMP     op_finish
+00001B50                          1059  op_rts:
+00001B50  14FC 0052               1060      MOVE.B  #'R', (A2)+
+00001B54  14FC 0054               1061      MOVE.B  #'T', (A2)+
+00001B58  14FC 0053               1062      MOVE.B  #'S', (A2)+
+00001B5C  4EF9 0000222C           1063      JMP     op_finish
+00001B62                          1064  op_jsr:
+00001B62  14FC 004A               1065      MOVE.B  #'J', (A2)+
+00001B66  14FC 0053               1066      MOVE.B  #'S', (A2)+
+00001B6A  14FC 0052               1067      MOVE.B  #'R', (A2)+
+00001B6E  4EB8 1082               1068      JSR     ea_start
+00001B72  4EF9 0000222C           1069      JMP     op_finish
+00001B78                          1070  op_jmp:
+00001B78  14FC 004A               1071      MOVE.B  #'J', (A2)+
+00001B7C  14FC 004D               1072      MOVE.B  #'M', (A2)+
+00001B80  14FC 0050               1073      MOVE.B  #'P', (A2)+
+00001B84  14FC 0020               1074      MOVE.B  #' ', (A2)+
+00001B88  4EB8 1082               1075      JSR     ea_start
+00001B8C  4EF9 0000222C           1076      JMP     op_finish
+00001B92                          1077  op_movem:
+00001B92  14FC 004D               1078      MOVE.B  #'M', (A2)+
+00001B96  14FC 004F               1079      MOVE.B  #'O', (A2)+
+00001B9A  14FC 0056               1080      MOVE.B  #'V', (A2)+
+00001B9E  14FC 0045               1081      MOVE.B  #'E', (A2)+
+00001BA2  14FC 004D               1082      MOVE.B  #'M', (A2)+
+00001BA6  4243                    1083      CLR     D3
+00001BA8  3610                    1084      MOVE.W  (A0), D3
+00001BAA  EE4B                    1085      LSR     #7, D3
+00001BAC  6500 000A               1086      BCS     op_movem_size_long
+00001BB0  163C 0001               1087      MOVE.B  #%01, D3
+00001BB4  6000 0006               1088      BRA     op_movem_size_continue
+00001BB8                          1089  op_movem_size_long:
+00001BB8  163C 0002               1090      MOVE.B  #%10, D3
+00001BBC                          1091  op_movem_size_continue:
+00001BBC  4EB8 17A0               1092      JSR     light_purple_size
+00001BC0                          1093  
+00001BC0  14FC 0020               1094      MOVE.B  #' ', (A2)+
+00001BC4                          1095  
+00001BC4  4243                    1096      CLR     D3
+00001BC6  1610                    1097      MOVE.B  (A0), D3
+00001BC8  E60B                    1098      LSR.B   #3, D3
+00001BCA  6500 001A               1099      BCS     op_movem_reg_to_mem
+00001BCE  4EB9 00001BFE           1100      JSR     op_movem_register
+00001BD4  14FC 002C               1101      MOVE.B  #',', (A2)+
+00001BD8  14FC 0020               1102      MOVE.B  #' ', (A2)+
+00001BDC  4EB8 1082               1103      JSR     ea_start
+00001BE0  4EF9 0000222C           1104      JMP     op_finish
+00001BE6                          1105  op_movem_reg_to_mem:
+00001BE6  4EB8 1082               1106      JSR     ea_start
+00001BEA  14FC 002C               1107      MOVE.B  #',', (A2)+
+00001BEE  14FC 0020               1108      MOVE.B  #' ', (A2)+
+00001BF2  4EB9 00001BFE           1109      JSR     op_movem_register
+00001BF8  4EF9 0000222C           1110      JMP     op_finish
+00001BFE                          1111  
+00001BFE                          1112  op_movem_register:
+00001BFE  4243                    1113      CLR     D3
+00001C00  3610                    1114      MOVE.W  (A0), D3
+00001C02  E60B                    1115      LSR.B   #3, D3
+00001C04  0203 0007               1116      ANDI.B  #7, D3
+00001C08  0C03 0004               1117      CMPI.B  #4, D3
+00001C0C  6700 F736               1118      BEQ     ea_rlm_predecr_start
+00001C10  6000 F896               1119      BRA     ea_rlm_postincr_start
+00001C14                          1120  
+00001C14                          1121  op_lea:
+00001C14  14FC 004C               1122      MOVE.B  #'L', (A2)+
+00001C18  14FC 0045               1123      MOVE.B  #'E', (A2)+
+00001C1C  14FC 0041               1124      MOVE.B  #'A', (A2)+
+00001C20  4EB8 1082               1125      JSR     ea_start
+00001C24  1210                    1126      MOVE.B  (A0), D1
+00001C26  E249                    1127      LSR     #1, D1
+00001C28  0241 000F               1128      ANDI    #$F,    D1
+00001C2C  4EB8 1082               1129      JSR     ea_start
+00001C30  4EF9 0000222C           1130      JMP     op_finish
+00001C36                          1131  
+00001C36                          1132  ********************************************
+00001C36                          1133  *                 OP 0101                  *
+00001C36                          1134  ********************************************
+00001C36                          1135  op_addq:
+00001C36  14FC 0041               1136      MOVE.B  #'A', (A2)+
+00001C3A  14FC 0044               1137      MOVE.B  #'D', (A2)+
+00001C3E  14FC 0044               1138      MOVE.B  #'D', (A2)+
+00001C42  14FC 0051               1139      MOVE.B  #'Q', (A2)+
+00001C46  4283                    1140      CLR.L   D3
+00001C48  3610                    1141      MOVE.W  (A0), D3
+00001C4A  EC4B                    1142      LSR     #6, D3
+00001C4C  4EB8 17A0               1143      JSR     light_purple_size
+00001C50  14FC 0020               1144      MOVE.B  #' ', (A2)+
+00001C54  14FC 0023               1145      MOVE.B  #'#', (A2)+
+00001C58  4283                    1146      CLR.L   D3
+00001C5A  1610                    1147      MOVE.B  (A0), D3
+00001C5C  E24B                    1148      LSR     #1, D3
+00001C5E  0243 0007               1149      ANDI    #7, D3
+00001C62  4EB9 00002252           1150      JSR     int_to_ascii
+00001C68  14FC 002C               1151      MOVE.B  #',', (A2)+
+00001C6C  14FC 0020               1152      MOVE.B  #' ', (A2)+
+00001C70  3210                    1153      MOVE.W  (A0), D1
+00001C72  4EB8 1082               1154      JSR     ea_start
+00001C76  4EF9 0000222C           1155      JMP     op_finish
+00001C7C                          1156  op_subq:
+00001C7C  14FC 0053               1157      MOVE.B  #'S', (A2)+
+00001C80  14FC 0055               1158      MOVE.B  #'U', (A2)+
+00001C84  14FC 0042               1159      MOVE.B  #'B', (A2)+
+00001C88  14FC 0051               1160      MOVE.B  #'Q', (A2)+
+00001C8C  4283                    1161      CLR.L   D3
+00001C8E  3610                    1162      MOVE.W  (A0), D3
+00001C90  EC4B                    1163      LSR     #6, D3
+00001C92  4EB8 17A0               1164      JSR     light_purple_size
+00001C96  14FC 0020               1165      MOVE.B  #' ', (A2)+
+00001C9A  14FC 0023               1166      MOVE.B  #'#', (A2)+
+00001C9E  4283                    1167      CLR.L   D3
+00001CA0  1610                    1168      MOVE.B  (A0), D3
+00001CA2  E24B                    1169      LSR     #1, D3
+00001CA4  0243 0007               1170      ANDI    #7, D3
+00001CA8  4EB9 00002252           1171      JSR     int_to_ascii
+00001CAE  14FC 002C               1172      MOVE.B  #',', (A2)+
+00001CB2  14FC 0020               1173      MOVE.B  #' ', (A2)+
+00001CB6  3210                    1174      MOVE.W  (A0), D1
+00001CB8  4EB8 1082               1175      JSR     ea_start
+00001CBC  4EF9 0000222C           1176      JMP     op_finish
+00001CC2                          1177  
+00001CC2                          1178  ********************************************
+00001CC2                          1179  *                 OP 0110                  *
+00001CC2                          1180  ********************************************
+00001CC2                          1181  op_bra:
+00001CC2  14FC 0042               1182      MOVE.B  #'B', (A2)+
+00001CC6  14FC 0052               1183      MOVE.B  #'R', (A2)+
+00001CCA  14FC 0041               1184      MOVE.B  #'A', (A2)+
+00001CCE  3210                    1185      MOVE.W  (A0),   D1
+00001CD0  0241 00FF               1186      ANDI    #$FF,   D1
+00001CD4  4EB8 1276               1187      JSR     ea_displacement_start
+00001CD8  4EF9 0000222C           1188      JMP     op_finish
+00001CDE                          1189  
+00001CDE                          1190  op_bsr:
+00001CDE  14FC 0042               1191      MOVE.B  #'B', (A2)+
+00001CE2  14FC 0053               1192      MOVE.B  #'S', (A2)+
+00001CE6  14FC 0052               1193      MOVE.B  #'R', (A2)+
+00001CEA  3210                    1194      MOVE.W  (A0),   D1
+00001CEC  0241 000F               1195      ANDI    #$F,    D1
+00001CF0  4EB8 1276               1196      JSR     ea_displacement_start
+00001CF4  4EF9 0000222C           1197      JMP     op_finish
+00001CFA                          1198  op_bcc:
+00001CFA  14FC 0042               1199      MOVE.B  #'B', (A2)+
+00001CFE  3A10                    1200      MOVE.W  (A0), D5
+00001D00  E04D                    1201      LSR     #8, D5
+00001D02  0C05 0062               1202      CMPI.B  #$62, D5
+00001D06  6700 00B0               1203      BEQ     op_bhi
+00001D0A  0C05 0063               1204      CMPI.B  #$63, D5
+00001D0E  6700 00C4               1205      BEQ     op_bls
+00001D12  0C05 0064               1206      CMPI.B  #$64, D5
+00001D16  6700 005A               1207      BEQ     op_bcc_cc
+00001D1A  0C05 0065               1208      CMPI.B  #$65, D5
+00001D1E  6700 0060               1209      BEQ     op_bcs
+00001D22  0C05 0066               1210      CMPI.B  #$66, D5
+00001D26  6700 00D6               1211      BEQ     op_bne
+00001D2A  0C05 0067               1212      CMPI.B  #$67, D5
+00001D2E  6700 005E               1213      BEQ     op_beq
+00001D32  0C05 0068               1214      CMPI.B  #$68, D5
+00001D36  6700 00E2               1215      BEQ     op_bvc
+00001D3A  0C05 0069               1216      CMPI.B  #$69, D5
+00001D3E  6700 00E8               1217      BEQ     op_bvs
+00001D42  0C05 006A               1218      CMPI.B  #$6A, D5
+00001D46  6700 00C4               1219      BEQ     op_bpl
+00001D4A  0C05 006B               1220      CMPI.B  #$6B, D5
+00001D4E  6700 00A0               1221      BEQ     op_bmi
+00001D52  0C05 006C               1222      CMPI.B  #$6C, D5
+00001D56  6700 0044               1223      BEQ     op_bge
+00001D5A  0C05 006D               1224      CMPI.B  #$6D, D5
+00001D5E  6700 0082               1225      BEQ     op_blt
+00001D62  0C05 006E               1226      CMPI.B  #$6E, D5
+00001D66  6700 0042               1227      BEQ     op_bgt
+00001D6A  0C05 006F               1228      CMPI.B  #$6F, D5
+00001D6E  6700 0056               1229      BEQ     op_ble
+00001D72                          1230  
+00001D72                          1231  
+00001D72                          1232  op_bcc_cc:
+00001D72  14FC 0043               1233      MOVE.B #'C', (A2)+
+00001D76  14FC 0043               1234      MOVE.B #'C', (A2)+
+00001D7A  4EF9 00001E30           1235      JMP     op_bcc_continue
+00001D80                          1236  
+00001D80                          1237  op_bcs:
+00001D80  14FC 0043               1238      MOVE.B #'C', (A2)+
+00001D84  14FC 0053               1239      MOVE.B #'S', (A2)+
+00001D88  4EF9 00001E30           1240      JMP     op_bcc_continue
+00001D8E                          1241  op_beq:
+00001D8E  14FC 0045               1242      MOVE.B #'E', (A2)+
+00001D92  14FC 0051               1243      MOVE.B #'Q', (A2)+
+00001D96  4EF9 00001E30           1244      JMP     op_bcc_continue
+00001D9C                          1245  op_bge:
+00001D9C  14FC 0047               1246      MOVE.B #'G', (A2)+
+00001DA0  14FC 0045               1247      MOVE.B #'E', (A2)+
+00001DA4  4EF9 00001E30           1248      JMP     op_bcc_continue
+00001DAA                          1249  op_bgt:
+00001DAA  14FC 0047               1250      MOVE.B #'G', (A2)+
+00001DAE  14FC 0054               1251      MOVE.B #'T', (A2)+
+00001DB2  4EF9 00001E30           1252      JMP     op_bcc_continue
+00001DB8                          1253  op_bhi:
+00001DB8  14FC 0048               1254      MOVE.B #'H', (A2)+
+00001DBC  14FC 0049               1255      MOVE.B #'I', (A2)+
+00001DC0  4EF9 00001E30           1256      JMP     op_bcc_continue
+00001DC6                          1257  op_ble:
+00001DC6  14FC 004C               1258      MOVE.B #'L', (A2)+
+00001DCA  14FC 0045               1259      MOVE.B #'E', (A2)+
+00001DCE  4EF9 00001E30           1260      JMP     op_bcc_continue
+00001DD4                          1261  op_bls:
+00001DD4  14FC 004C               1262      MOVE.B #'L', (A2)+
+00001DD8  14FC 0053               1263      MOVE.B #'S', (A2)+
+00001DDC  4EF9 00001E30           1264      JMP     op_bcc_continue
+00001DE2                          1265  op_blt:
+00001DE2  14FC 004C               1266      MOVE.B #'L', (A2)+
+00001DE6  14FC 0054               1267      MOVE.B #'T', (A2)+
+00001DEA  4EF9 00001E30           1268      JMP     op_bcc_continue
+00001DF0                          1269  op_bmi:
+00001DF0  14FC 004D               1270      MOVE.B #'M', (A2)+
+00001DF4  14FC 0049               1271      MOVE.B #'I', (A2)+
+00001DF8  4EF9 00001E30           1272      JMP     op_bcc_continue
+00001DFE                          1273  op_bne:
+00001DFE  14FC 004E               1274      MOVE.B #'N', (A2)+
+00001E02  14FC 0045               1275      MOVE.B #'E', (A2)+
+00001E06  4EF9 00001E30           1276      JMP     op_bcc_continue
+00001E0C                          1277  op_bpl:
+00001E0C  14FC 0050               1278      MOVE.B #'P', (A2)+
+00001E10  14FC 004C               1279      MOVE.B #'L', (A2)+
+00001E14  4EF9 00001E30           1280      JMP     op_bcc_continue
+00001E1A                          1281  op_bvc:
+00001E1A  14FC 0056               1282      MOVE.B #'V', (A2)+
+00001E1E  14FC 0043               1283      MOVE.B #'C', (A2)+
+00001E22  4EF9 00001E30           1284      JMP     op_bcc_continue
+00001E28                          1285  op_bvs:
+00001E28  14FC 0056               1286      MOVE.B #'V', (A2)+
+00001E2C  14FC 0053               1287      MOVE.B #'S', (A2)+
+00001E30                          1288  
+00001E30                          1289  op_bcc_continue:
+00001E30  3A10                    1290      MOVE.W  (A0), D5
+00001E32  0285 0000000F           1291      ANDI.L  #$F, D5
+00001E38  0C85 00000000           1292      CMPI.L  #$0, D5
+00001E3E  6700 0006               1293      BEQ     op_bcc_size_word
+00001E42  6000 0010               1294      BRA     op_bcc_size_byte
+00001E46                          1295  op_bcc_size_word:
+00001E46  14FC 002E               1296      MOVE.B #'.', (A2)+
+00001E4A  14FC 0057               1297      MOVE.B #'W', (A2)+
+00001E4E  4EF9 00001E5C           1298      JMP     op_bcc_size_continue
+00001E54                          1299  op_bcc_size_byte:
+00001E54  14FC 002E               1300      MOVE.B #'.', (A2)+
+00001E58  14FC 0042               1301      MOVE.B #'B', (A2)+
+00001E5C                          1302  op_bcc_size_continue:
+00001E5C  3210                    1303      MOVE.W  (A0),   D1
+00001E5E  0241 000F               1304      ANDI    #$F,    D1
+00001E62  4EB8 1276               1305      JSR     ea_displacement_start
+00001E66  4EF9 0000222C           1306      JMP     op_finish
+00001E6C                          1307  
+00001E6C                          1308  ********************************************
+00001E6C                          1309  *                 OP 0111                  *
+00001E6C                          1310  ********************************************
+00001E6C                          1311  op_moveq:
+00001E6C  14FC 004D               1312      MOVE.B  #'M', (A2)+
+00001E70  14FC 004F               1313      MOVE.B  #'O', (A2)+
+00001E74  14FC 0056               1314      MOVE.B  #'V', (A2)+
+00001E78  14FC 0045               1315      MOVE.B  #'E', (A2)+
+00001E7C  14FC 0051               1316      MOVE.B  #'Q', (A2)+
+00001E80  14FC 0020               1317      MOVE.B  #' ', (A2)+
+00001E84  14FC 0023               1318      MOVE.B  #'#', (A2)+
+00001E88  3610                    1319      MOVE.W  (A0),  D3
+00001E8A  0243 00FF               1320      ANDI.W  #$FF,   D3
+00001E8E  4EB9 00002252           1321      JSR     int_to_ascii
+00001E94  14FC 002C               1322      MOVE.B  #',', (A2)+
+00001E98  14FC 0020               1323      MOVE.B  #' ', (A2)+
+00001E9C  1210                    1324      MOVE.B  (A0), D1
+00001E9E  E249                    1325      LSR     #1, D1
+00001EA0  0241 0007               1326      ANDI    #$7, D1
+00001EA4  4EB8 1082               1327      JSR     ea_start
+00001EA8  4EF9 0000222C           1328      JMP     op_finish
+00001EAE                          1329  
+00001EAE                          1330  ********************************************
+00001EAE                          1331  *                 OP 1000                  *
+00001EAE                          1332  ********************************************
+00001EAE                          1333  op_or:
+00001EAE  14FC 004F               1334      MOVE.B #'O', (A2)+
+00001EB2  14FC 0052               1335      MOVE.B #'R', (A2)+
+00001EB6  3610                    1336      MOVE.W  (A0), D3
+00001EB8  EC4B                    1337      LSR     #6, D3
+00001EBA  4EB8 17A0               1338      JSR     light_purple_size
+00001EBE  14FC 0020               1339      MOVE.B  #' ', (A2)+
+00001EC2  3210                    1340      MOVE.W  (A0), D1
+00001EC4  4EB8 1082               1341      JSR     ea_start
+00001EC8  14FC 002C               1342      MOVE.B  #',', (A2)+
+00001ECC  14FC 0020               1343      MOVE.B  #' ', (A2)+
+00001ED0  4281                    1344      CLR.L   D1
+00001ED2  1210                    1345      MOVE.B  (A0), D1
+00001ED4  E249                    1346      LSR     #1, D1
+00001ED6  0241 0007               1347      ANDI    #7, D1
+00001EDA  4EB8 1082               1348      JSR     ea_start
+00001EDE  4EF9 0000222C           1349      JMP     op_finish
+00001EE4                          1350  op_divs:
+00001EE4  14FC 0044               1351      MOVE.B  #'D', (A2)+
+00001EE8  14FC 0049               1352      MOVE.B  #'I', (A2)+
+00001EEC  14FC 0056               1353      MOVE.B  #'V', (A2)+
+00001EF0  14FC 0053               1354      MOVE.B  #'S', (A2)+
+00001EF4  14FC 0020               1355      MOVE.B  #' ', (A2)+
+00001EF8  3210                    1356      MOVE.W  (A0), D1
+00001EFA  4EB8 1082               1357      JSR     ea_start
+00001EFE  14FC 002C               1358      MOVE.B  #',', (A2)+
+00001F02  14FC 0020               1359      MOVE.B  #' ', (A2)+
+00001F06  4281                    1360      CLR.L   D1
+00001F08  1210                    1361      MOVE.B  (A0), D1
+00001F0A  E249                    1362      LSR     #1, D1
+00001F0C  0241 0007               1363      ANDI    #7, D1
+00001F10  4EB8 1082               1364      JSR     ea_start
+00001F14  4EF9 0000222C           1365      JMP     op_finish
+00001F1A                          1366  
+00001F1A                          1367  op_divu:
+00001F1A  14FC 0044               1368      MOVE.B  #'D', (A2)+
+00001F1E  14FC 0049               1369      MOVE.B  #'I', (A2)+
+00001F22  14FC 0056               1370      MOVE.B  #'V', (A2)+
+00001F26  14FC 0055               1371      MOVE.B  #'U', (A2)+
+00001F2A  14FC 0020               1372      MOVE.B  #' ', (A2)+
+00001F2E  3210                    1373      MOVE.W  (A0), D1
+00001F30  4EB8 1082               1374      JSR     ea_start
+00001F34  14FC 002C               1375      MOVE.B  #',', (A2)+
+00001F38  14FC 0020               1376      MOVE.B  #' ', (A2)+
+00001F3C  4281                    1377      CLR.L   D1
+00001F3E  1210                    1378      MOVE.B  (A0), D1
+00001F40  E249                    1379      LSR     #1, D1
+00001F42  0241 0007               1380      ANDI    #7, D1
+00001F46  4EB8 1082               1381      JSR     ea_start
+00001F4A  4EF9 0000222C           1382      JMP     op_finish
+00001F50                          1383  
+00001F50                          1384  ********************************************
+00001F50                          1385  *                 OP 1001                  *
+00001F50                          1386  ********************************************
+00001F50                          1387  
+00001F50                          1388  op_sub:
+00001F50  14FC 0053               1389      MOVE.B #'S', (A2)+
+00001F54  14FC 0055               1390      MOVE.B #'U', (A2)+
+00001F58  14FC 0042               1391      MOVE.B #'B', (A2)+
+00001F5C  3610                    1392      MOVE.W  (A0), D3
+00001F5E  EC4B                    1393      LSR     #6, D3
+00001F60  4EB8 17A0               1394      JSR     light_purple_size
+00001F64  14FC 0020               1395      MOVE.B  #' ', (A2)+
+00001F68  3210                    1396      MOVE.W  (A0), D1
+00001F6A  4EB8 1082               1397      JSR     ea_start
+00001F6E  14FC 002C               1398      MOVE.B  #',', (A2)+
+00001F72  14FC 0020               1399      MOVE.B  #' ', (A2)+
+00001F76  4281                    1400      CLR.L   D1
+00001F78  1210                    1401      MOVE.B  (A0), D1
+00001F7A  E249                    1402      LSR     #1, D1
+00001F7C  0241 0007               1403      ANDI    #7, D1
+00001F80  4EB8 1082               1404      JSR     ea_start
+00001F84  4EF9 0000222C           1405      JMP     op_finish
+00001F8A                          1406  ********************************************
+00001F8A                          1407  *                 OP 1011                  *
+00001F8A                          1408  ********************************************
+00001F8A                          1409  op_eor:
+00001F8A  14FC 0045               1410      MOVE.B #'E', (A2)+
+00001F8E  14FC 004F               1411      MOVE.B #'O', (A2)+
+00001F92  14FC 0052               1412      MOVE.B #'R', (A2)+
+00001F96  3610                    1413      MOVE.W  (A0), D3
+00001F98  EC4B                    1414      LSR     #6, D3
+00001F9A  4EB8 17A0               1415      JSR     light_purple_size
+00001F9E  14FC 0020               1416      MOVE.B  #' ', (A2)+
+00001FA2  1210                    1417      MOVE.B  (A0), D1
+00001FA4  E249                    1418      LSR     #1, D1
+00001FA6  0241 0007               1419      ANDI    #7, D1
+00001FAA  4EB8 1082               1420      JSR     ea_start
+00001FAE  14FC 002C               1421      MOVE.B  #',', (A2)+
+00001FB2  14FC 0020               1422      MOVE.B  #' ', (A2)+
+00001FB6  4281                    1423      CLR.L   D1
+00001FB8  3210                    1424      MOVE.W  (A0), D1
+00001FBA  4EB8 1082               1425      JSR     ea_start
+00001FBE  4EF9 0000222C           1426      JMP     op_finish
+00001FC4                          1427  op_cmp:
+00001FC4  14FC 0043               1428      MOVE.B #'C', (A2)+
+00001FC8  14FC 004D               1429      MOVE.B #'M', (A2)+
+00001FCC  14FC 0050               1430      MOVE.B #'P', (A2)+
+00001FD0  3610                    1431      MOVE.W  (A0), D3
+00001FD2  EC4B                    1432      LSR     #6, D3
+00001FD4  4EB8 17A0               1433      JSR     light_purple_size
+00001FD8  14FC 0020               1434      MOVE.B  #' ', (A2)+
+00001FDC  3210                    1435      MOVE.W  (A0), D1
+00001FDE  4EB8 1082               1436      JSR     ea_start
+00001FE2  14FC 002C               1437      MOVE.B  #',', (A2)+
+00001FE6  14FC 0020               1438      MOVE.B  #' ', (A2)+
+00001FEA  4281                    1439      CLR.L   D1
+00001FEC  1210                    1440      MOVE.B  (A0), D1
+00001FEE  E249                    1441      LSR     #1, D1
+00001FF0  0241 0007               1442      ANDI    #7, D1
+00001FF4  4EB8 1082               1443      JSR     ea_start
+00001FF8  4EF9 0000222C           1444      JMP     op_finish
+00001FFE                          1445  
+00001FFE                          1446  ********************************************
+00001FFE                          1447  *                 OP 1100                  *
+00001FFE                          1448  ********************************************
+00001FFE                          1449  op_and:
+00001FFE  14FC 0041               1450      MOVE.B #'A', (A2)+
+00002002  14FC 004E               1451      MOVE.B #'N', (A2)+
+00002006  14FC 0044               1452      MOVE.B #'D', (A2)+
+0000200A  3610                    1453      MOVE.W  (A0), D3
+0000200C  EC4B                    1454      LSR     #6, D3
+0000200E  4EB8 17A0               1455      JSR     light_purple_size
+00002012  14FC 0020               1456      MOVE.B  #' ', (A2)+
+00002016  3210                    1457      MOVE.W  (A0), D1
+00002018  4EB8 1082               1458      JSR     ea_start
+0000201C  14FC 002C               1459      MOVE.B  #',', (A2)+
+00002020  14FC 0020               1460      MOVE.B  #' ', (A2)+
+00002024  4281                    1461      CLR.L   D1
+00002026  1210                    1462      MOVE.B  (A0), D1
+00002028  E249                    1463      LSR     #1, D1
+0000202A  0241 0007               1464      ANDI    #7, D1
+0000202E  4EB8 1082               1465      JSR     ea_start
+00002032  4EF9 0000222C           1466      JMP     op_finish
+00002038                          1467  
+00002038                          1468  op_mulu:
+00002038  14FC 004D               1469      MOVE.B  #'M', (A2)+
+0000203C  14FC 0055               1470      MOVE.B  #'U', (A2)+
+00002040  14FC 004C               1471      MOVE.B  #'L', (A2)+
+00002044  14FC 0055               1472      MOVE.B  #'U', (A2)+
+00002048  3610                    1473      MOVE.W  (A0), D3
+0000204A  EC4B                    1474      LSR     #6, D3
+0000204C  4EB8 17A0               1475      JSR     light_purple_size
+00002050  14FC 0020               1476      MOVE.B  #' ', (A2)+
+00002054  3210                    1477      MOVE.W  (A0), D1
+00002056  4EB8 1082               1478      JSR     ea_start
+0000205A  14FC 002C               1479      MOVE.B  #',', (A2)+
+0000205E  14FC 0020               1480      MOVE.B  #' ', (A2)+
+00002062  4281                    1481      CLR.L   D1
+00002064  1210                    1482      MOVE.B  (A0), D1
+00002066  E249                    1483      LSR     #1, D1
+00002068  0241 0007               1484      ANDI    #7, D1
+0000206C  4EB8 1082               1485      JSR     ea_start
+00002070  4EF9 0000222C           1486      JMP     op_finish
+00002076                          1487  
+00002076                          1488  op_muls:
+00002076  14FC 004D               1489      MOVE.B  #'M', (A2)+
+0000207A  14FC 0055               1490      MOVE.B  #'U', (A2)+
+0000207E  14FC 004C               1491      MOVE.B  #'L', (A2)+
+00002082  14FC 0053               1492      MOVE.B  #'S', (A2)+
+00002086  3610                    1493      MOVE.W  (A0), D3
+00002088  EC4B                    1494      LSR     #6, D3
+0000208A  4EB8 17A0               1495      JSR     light_purple_size
+0000208E  14FC 0020               1496      MOVE.B  #' ', (A2)+
+00002092  3210                    1497      MOVE.W  (A0), D1
+00002094  4EB8 1082               1498      JSR     ea_start
+00002098  14FC 002C               1499      MOVE.B  #',', (A2)+
+0000209C  14FC 0020               1500      MOVE.B  #' ', (A2)+
+000020A0  4281                    1501      CLR.L   D1
+000020A2  1210                    1502      MOVE.B  (A0), D1
+000020A4  E249                    1503      LSR     #1, D1
+000020A6  0241 0007               1504      ANDI    #7, D1
+000020AA  4EB8 1082               1505      JSR     ea_start
+000020AE  4EF9 0000222C           1506      JMP     op_finish
+000020B4                          1507  ********************************************
+000020B4                          1508  *                 OP 1101                  *
+000020B4                          1509  ********************************************
+000020B4                          1510  op_add:
+000020B4  14FC 0041               1511      MOVE.B #'A', (A2)+
+000020B8  14FC 0044               1512      MOVE.B #'D', (A2)+
+000020BC  14FC 0044               1513      MOVE.B #'D', (A2)+
+000020C0  3610                    1514      MOVE.W  (A0), D3
+000020C2  EC4B                    1515      LSR     #6, D3
+000020C4  4EB8 17A0               1516      JSR     light_purple_size
+000020C8  14FC 0020               1517      MOVE.B  #' ', (A2)+
+000020CC  3210                    1518      MOVE.W  (A0), D1
+000020CE  4EB8 1082               1519      JSR     ea_start
+000020D2  14FC 002C               1520      MOVE.B  #',', (A2)+
+000020D6  14FC 0020               1521      MOVE.B  #' ', (A2)+
+000020DA  4281                    1522      CLR.L   D1
+000020DC  1210                    1523      MOVE.B  (A0), D1
+000020DE  E249                    1524      LSR     #1, D1
+000020E0  0241 0007               1525      ANDI    #7, D1
+000020E4  4EB8 1082               1526      JSR     ea_start
+000020E8  4EF9 0000222C           1527      JMP     op_finish
+000020EE                          1528  
+000020EE                          1529  op_adda:
+000020EE  14FC 0041               1530      MOVE.B #'A', (A2)+
+000020F2  14FC 0044               1531      MOVE.B #'D', (A2)+
+000020F6  14FC 0044               1532      MOVE.B #'D', (A2)+
+000020FA  14FC 0041               1533      MOVE.B #'A', (A2)+
+000020FE  14FC 002E               1534      MOVE.B #'.', (A2)+
+00002102  3A10                    1535      MOVE.W  (A0), D5
+00002104  E10D                    1536      LSL.B   #8,   D5
+00002106  6400 002C               1537      BCC     op_adda_size_word
+0000210A  6000 002E               1538      BRA     op_adda_size_long
+0000210E                          1539  op_adda_continue:
+0000210E  14FC 0020               1540      MOVE.B  #' ', (A2)+
+00002112  3210                    1541      MOVE.W  (A0), D1
+00002114  4EB8 1082               1542      JSR     ea_start
+00002118  14FC 002C               1543      MOVE.B  #',', (A2)+
+0000211C  14FC 0020               1544      MOVE.B  #' ', (A2)+
+00002120  4281                    1545      CLR.L   D1
+00002122  1210                    1546      MOVE.B  (A0), D1
+00002124  E249                    1547      LSR     #1, D1
+00002126  0241 000F               1548      ANDI    #$F, D1
+0000212A  4EB8 1082               1549      JSR     ea_start
+0000212E  4EF9 0000222C           1550      JMP     op_finish
+00002134                          1551  
+00002134                          1552  op_adda_size_word:
+00002134  14FC 0057               1553      MOVE.B  #'W',   (A2)+
+00002138  60D4                    1554      BRA     op_adda_continue
+0000213A                          1555  
+0000213A                          1556  op_adda_size_long:
+0000213A  14FC 004C               1557      MOVE.B  #'L',   (A2)+
+0000213E  60CE                    1558      BRA     op_adda_continue
+00002140                          1559  
+00002140                          1560  ********************************************
+00002140                          1561  *                 OP 1110                  *
+00002140                          1562  ********************************************
+00002140                          1563  op_asx_ea:
+00002140  14FC 0041               1564      MOVE.B #'A', (A2)+
+00002144  14FC 0053               1565      MOVE.B #'S', (A2)+
+00002148  6000 003E               1566      BRA     op_shift_ea
+0000214C                          1567  
+0000214C                          1568  op_asx_reg:
+0000214C  14FC 0041               1569      MOVE.B #'A', (A2)+
+00002150  14FC 0053               1570      MOVE.B #'S', (A2)+
+00002154  6000 005A               1571      BRA     op_shift_reg
+00002158                          1572  
+00002158                          1573  op_lsx_reg:
+00002158  14FC 004C               1574      MOVE.B #'L', (A2)+
+0000215C  14FC 0053               1575      MOVE.B #'S', (A2)+
+00002160  6000 004E               1576      BRA     op_shift_reg
+00002164                          1577  
+00002164                          1578  op_lsx_ea:
+00002164  14FC 004C               1579      MOVE.B #'L', (A2)+
+00002168  14FC 0053               1580      MOVE.B #'S', (A2)+
+0000216C  6000 001A               1581      BRA     op_shift_ea
+00002170                          1582  
+00002170                          1583  op_rox_reg:
+00002170  14FC 0052               1584      MOVE.B #'R', (A2)+
+00002174  14FC 004F               1585      MOVE.B #'O', (A2)+
+00002178  6000 0036               1586      BRA     op_shift_reg
+0000217C                          1587  
+0000217C                          1588  op_rox_ea:
+0000217C  14FC 0052               1589      MOVE.B #'R', (A2)+
+00002180  14FC 004F               1590      MOVE.B #'O', (A2)+
+00002184  6000 0002               1591      BRA     op_shift_ea
+00002188                          1592  
+00002188                          1593  op_shift_ea:
+00002188  3A10                    1594      MOVE.W  (A0), D5
+0000218A  E14D                    1595      LSL.W   #8, D5
+0000218C  6500 000A               1596      BCS     op_shift_left_ea
+00002190  14FC 0052               1597      MOVE.B  #'R', (A2)+
+00002194  6000 0006               1598      BRA     op_shift_ea_continue
+00002198                          1599  op_shift_left_ea:
+00002198  14FC 004C               1600      MOVE.B  #'L', (A2)+
+0000219C                          1601  op_shift_ea_continue:
+0000219C  3210                    1602      MOVE.W  (A0), D1
+0000219E  0241 00FF               1603      ANDI    #$FF,    D1
+000021A2  14FC 0020               1604      MOVE.B  #' ', (A2)+
+000021A6  4EB8 1082               1605      JSR     ea_start
+000021AA  4EF9 0000222C           1606      JMP     op_finish
+000021B0                          1607  
+000021B0                          1608  op_shift_reg:
+000021B0  3A10                    1609      MOVE.W  (A0), D5
+000021B2  E14D                    1610      LSL.W   #8, D5
+000021B4  6500 000A               1611      BCS     op_shiftleft_reg
+000021B8  14FC 0052               1612      MOVE.B  #'R', (A2)+
+000021BC  6000 0006               1613      BRA     op_shift_reg_continue
+000021C0                          1614  op_shiftleft_reg:
+000021C0  14FC 004C               1615      MOVE.B  #'L', (A2)+
+000021C4                          1616  op_shift_reg_continue:
+000021C4  3610                    1617      MOVE.W  (A0), D3
+000021C6  EC4B                    1618      LSR.W   #6, D3
+000021C8  4EB8 17A0               1619      JSR     light_purple_size
+000021CC  14FC 0020               1620      MOVE.B  #' ', (A2)+
+000021D0  3610                    1621      MOVE.W  (A0), D3
+000021D2  EC4B                    1622      LSR     #6, D3
+000021D4  6500 002E               1623      BCS     op_shift_is_register
+000021D8  4243                    1624      CLR     D3
+000021DA  1610                    1625      MOVE.B  (A0), D3
+000021DC  E20B                    1626      LSR.B   #1, D3
+000021DE  0203 0007               1627      ANDI.B  #$7, D3
+000021E2  4EB9 00002252           1628      JSR int_to_ascii
+000021E8  14FC 002C               1629      MOVE.B  #',', (A2)+
+000021EC  14FC 0020               1630      MOVE.B  #' ', (A2)+
+000021F0  4241                    1631      CLR     D1
+000021F2  3210                    1632      MOVE.W  (A0), D1
+000021F4  0281 00000007           1633      ANDI.L  #$7, D1
+000021FA  4EB8 1082               1634      JSR ea_start
+000021FE  4EF9 0000222C           1635      JMP op_finish
+00002204                          1636  
+00002204                          1637  op_shift_is_register:
+00002204  1210                    1638      MOVE.B  (A0), D1
+00002206  E249                    1639      LSR.W   #1, D1
+00002208  0201 0007               1640      ANDI.B  #$7, D1
+0000220C  4EB8 1082               1641      JSR ea_start
+00002210  14FC 002C               1642      MOVE.B  #',', (A2)+
+00002214  14FC 0020               1643      MOVE.B  #' ', (A2)+
+00002218  4241                    1644      CLR     D1
+0000221A  3210                    1645      MOVE.W  (A0), D1
+0000221C  0281 00000007           1646      ANDI.L  #$7, D1
+00002222  4EB8 1082               1647      JSR ea_start
+00002226  4EF9 0000222C           1648      JMP op_finish
+0000222C                          1649  
+0000222C                          1650  
+0000222C                          1651  
+0000222C                          1652  op_finish:
+0000222C  14FC 000D               1653      MOVE.B #$0D, (A2)+
+00002230  14FC 000A               1654      MOVE.B #$0A, (A2)+
+00002234  14FC 0000               1655      MOVE.B #0, (A2)+
+00002238  327C 0000               1656      MOVEA #0, A1
+0000223C  103C 000E               1657      MOVE.B #14, D0
+00002240  4E4F                    1658      TRAP #15
+00002242  247C 00000000           1659      MOVE.L #0, A2
+00002248  5448                    1660      ADDA    #2, A0
+0000224A  6000 EDB8               1661      BRA op_start
+0000224E                          1662  
+0000224E                          1663  op_unsupported:
+0000224E  6000 002E               1664      BRA end
+00002252                          1665  
+00002252                          1666  int_to_ascii:
+00002252  4285                    1667      CLR.L   D5
+00002254  14FC 0024               1668      MOVE.B #'$', (A2)+
+00002258                          1669      ;ROL.L   #1, D3
+00002258                          1670     ; BCS     itoa_negative
+00002258                          1671  ;itoa_buffer:
+00002258                          1672     ; ROR.L   #1, D3
+00002258                          1673  
+00002258                          1674  itoa_start:
+00002258  E99B                    1675      ROL.L #4, D3
+0000225A  1803                    1676      MOVE.B D3, D4
+0000225C  0204 000F               1677      ANDI.B #$0F, D4
+00002260  0604 0030               1678      ADDI.B #$30, D4
+00002264  0C04 003A               1679      CMPI.B #$3A, D4
+00002268  6C00 000E               1680      BGE itoa_character
+0000226C                          1681  itoa_continue:
+0000226C  14C4                    1682      MOVE.B D4, (A2)+
+0000226E  5205                    1683      ADDI.B #1, D5
+00002270  0C05 0008               1684      CMPI.B #8, D5
+00002274  66E2                    1685      BNE itoa_start
+00002276  4E75                    1686      RTS
+00002278                          1687  itoa_character:
+00002278  5E04                    1688      ADDI.B #7, D4
+0000227A  4EF8 226C               1689      JMP itoa_continue
+0000227E                          1690  
+0000227E                          1691  ;itoa_negative:
+0000227E                          1692      ;NOT.L    D3
+0000227E                          1693     ; ADDI    #1, D3
+0000227E                          1694     ; JMP itoa_buffer
+0000227E                          1695  
+0000227E                          1696  
+0000227E                          1697  end:
+0000227E                          1698  
+0000227E                          1699  * CONSTANTS
+0000227E                          1700  
+0000227E                          1701  * Put variables and constants here
+0000227E                          1702  
+0000227E  FFFF FFFF               1703      SIMHALT             ; halt simulator
+00002282                          1704      END    START        ; last line of source
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+CODE0000            17C6
+CODE0001            1800
+CODE0010            1804
+CODE0011            1808
+CODE0100            180C
+CODE0101            188E
+CODE0110            189E
+CODE0111            18B6
+CODE1000            18BA
+CODE1001            18D4
+CODE1011            18DA
+CODE1100            18E8
+CODE1101            1902
+CODE1110            1916
+CODE_SHIFT_EA       193A
+CODE_SHIFT_REG      1928
+CONTINUE_MOVE_A     1A0E
+DARK_PURPLE_SIZING1  1A24
+DARK_PURPLE_SIZING2  1A30
+DARK_PURPLE_SIZING3  1A3C
+EA_A0               1692
+EA_A1               169C
+EA_A2               16A6
+EA_A3               16B0
+EA_A4               16BA
+EA_A5               16C4
+EA_A6               16CE
+EA_A7               16D8
+EA_ADDRESS          1718
+EA_ADDRESS_CONTINUE  179A
+EA_ADDRESS_DISPLACEMENT  1336
+EA_ADDRESS_INDEX    133A
+EA_ADDRESS_NOT_A0   172E
+EA_ADDRESS_NOT_A1   173E
+EA_ADDRESS_NOT_A2   174E
+EA_ADDRESS_NOT_A3   175E
+EA_ADDRESS_NOT_A4   176E
+EA_ADDRESS_NOT_A5   177E
+EA_ADDRESS_NOT_A6   178E
+EA_ADDRESS_POST_INCREMENT  113E
+EA_ADDRESS_PRE_DECREMENT  11DA
+EA_ADDRESS_REGISTER  16E2
+EA_APD_CONTINUE     1270
+EA_APD_NOT_A0       11F6
+EA_APD_NOT_A1       1208
+EA_APD_NOT_A2       121A
+EA_APD_NOT_A3       122C
+EA_APD_NOT_A4       123E
+EA_APD_NOT_A5       1250
+EA_APD_NOT_A6       1262
+EA_API_CONTINUE     11D0
+EA_API_NOT_A0       1156
+EA_API_NOT_A1       1168
+EA_API_NOT_A2       117A
+EA_API_NOT_A3       118C
+EA_API_NOT_A4       119E
+EA_API_NOT_A5       11B0
+EA_API_NOT_A6       11C2
+EA_BYTE_IMMEDIATE   1122
+EA_D0               160C
+EA_D1               1616
+EA_D2               1620
+EA_D3               162A
+EA_D4               1634
+EA_D5               163E
+EA_D6               1648
+EA_D7               1652
+EA_DATA_REGISTER    165C
+EA_DISPLACEMENT_16  12A6
+EA_DISPLACEMENT_32  12B6
+EA_DISPLACEMENT_NOT_16  1284
+EA_DISPLACEMENT_NOT_32  1292
+EA_DISPLACEMENT_START  1276
+EA_IMMEDIATE_SIZE_B  10E0
+EA_IMMEDIATE_SIZE_L  10F8
+EA_IMMEDIATE_SIZE_W  10EC
+EA_IMMEDIATE_START  10CA
+EA_LONG_IMMEDIATE   1104
+EA_MODE_SEVEN       12C8
+EA_MODE_SEVEN_ABS_LONG  1306
+EA_MODE_SEVEN_ABS_SHORT  12EA
+EA_MODE_SEVEN_IMMEDIATE  1324
+EA_NOT_SUPPORTED    133E
+EA_RLM_PD_ADDR_CONTINUE  149C
+EA_RLM_PD_ADDR_LOOP_END  149C
+EA_RLM_PD_ADDR_LOOP_NOSLASH  1410
+EA_RLM_PD_ADDR_LOOP_START  13FE
+EA_RLM_PD_DATA_CONTINUE  13F0
+EA_RLM_PD_DATA_LOOP_END  13F0
+EA_RLM_PD_DATA_LOOP_NOSLASH  1364
+EA_RLM_PD_DATA_LOOP_START  1352
+EA_RLM_PD_NOT_A0    1422
+EA_RLM_PD_NOT_A1    1434
+EA_RLM_PD_NOT_A2    1446
+EA_RLM_PD_NOT_A3    1458
+EA_RLM_PD_NOT_A4    146A
+EA_RLM_PD_NOT_A5    147C
+EA_RLM_PD_NOT_A6    148E
+EA_RLM_PD_NOT_D0    1376
+EA_RLM_PD_NOT_D1    1388
+EA_RLM_PD_NOT_D2    139A
+EA_RLM_PD_NOT_D3    13AC
+EA_RLM_PD_NOT_D4    13BE
+EA_RLM_PD_NOT_D5    13D0
+EA_RLM_PD_NOT_D6    13E2
+EA_RLM_PI_ADDR_CONTINUE  1554
+EA_RLM_PI_ADDR_LOOP_END  1554
+EA_RLM_PI_ADDR_LOOP_NOSLASH  14C8
+EA_RLM_PI_ADDR_LOOP_START  14B6
+EA_RLM_PI_DATA_CONTINUE  1600
+EA_RLM_PI_DATA_LOOP_END  1600
+EA_RLM_PI_DATA_LOOP_NOSLASH  1574
+EA_RLM_PI_DATA_LOOP_START  1562
+EA_RLM_PI_NOT_A0    14DA
+EA_RLM_PI_NOT_A1    14EC
+EA_RLM_PI_NOT_A2    14FE
+EA_RLM_PI_NOT_A3    1510
+EA_RLM_PI_NOT_A4    1522
+EA_RLM_PI_NOT_A5    1534
+EA_RLM_PI_NOT_A6    1546
+EA_RLM_PI_NOT_D0    1586
+EA_RLM_PI_NOT_D1    1598
+EA_RLM_PI_NOT_D2    15AA
+EA_RLM_PI_NOT_D3    15BC
+EA_RLM_PI_NOT_D4    15CE
+EA_RLM_PI_NOT_D5    15E0
+EA_RLM_PI_NOT_D6    15F2
+EA_RLM_POSTINCR_START  14A8
+EA_RLM_PREDECR_START  1344
+EA_START            1082
+EA_WORD_IMMEDIATE   1122
+END                 227E
+INT_TO_ASCII        2252
+ITOA_CHARACTER      2278
+ITOA_CONTINUE       226C
+ITOA_START          2258
+LIGHT_PURPLE_SIZE   17A0
+OPEXT_CONTINUE      1ACC
+OPEXT_SIZE_LONG     1AC4
+OPEXT_SIZE_WORD     1ABC
+OP_ADD              20B4
+OP_ADDA             20EE
+OP_ADDA_CONTINUE    210E
+OP_ADDA_SIZE_LONG   213A
+OP_ADDA_SIZE_WORD   2134
+OP_ADDI             1996
+OP_ADDQ             1C36
+OP_AND              1FFE
+OP_ANDI             1962
+OP_ASX_EA           2140
+OP_ASX_REG          214C
+OP_BCC              1CFA
+OP_BCC_CC           1D72
+OP_BCC_CONTINUE     1E30
+OP_BCC_SIZE_BYTE    1E54
+OP_BCC_SIZE_CONTINUE  1E5C
+OP_BCC_SIZE_WORD    1E46
+OP_BCS              1D80
+OP_BEQ              1D8E
+OP_BGE              1D9C
+OP_BGT              1DAA
+OP_BHI              1DB8
+OP_BLE              1DC6
+OP_BLS              1DD4
+OP_BLT              1DE2
+OP_BMI              1DF0
+OP_BNE              1DFE
+OP_BPL              1E0C
+OP_BRA              1CC2
+OP_BSR              1CDE
+OP_BVC              1E1A
+OP_BVS              1E28
+OP_CLR              1A6E
+OP_CMP              1FC4
+OP_CMPI             19CA
+OP_DIVS             1EE4
+OP_DIVU             1F1A
+OP_EOR              1F8A
+OP_EORI             19B0
+OP_EXT              1AA0
+OP_FINISH           222C
+OP_JMP              1B78
+OP_JSR              1B62
+OP_LEA              1C14
+OP_LSX_EA           2164
+OP_LSX_REG          2158
+OP_MOVE             19E4
+OP_MOVEA            1A68
+OP_MOVEM            1B92
+OP_MOVEM_REGISTER   1BFE
+OP_MOVEM_REG_TO_MEM  1BE6
+OP_MOVEM_SIZE_CONTINUE  1BBC
+OP_MOVEM_SIZE_LONG  1BB8
+OP_MOVEQ            1E6C
+OP_MULS             2076
+OP_MULU             2038
+OP_NOP              1B08
+OP_NOT              1A7E
+OP_NOT_CLR_CONTINUE  1A8A
+OP_OR               1EAE
+OP_ORI              194C
+OP_ROX_EA           217C
+OP_ROX_REG          2170
+OP_RTE              1B3E
+OP_RTS              1B50
+OP_SHIFTLEFT_REG    21C0
+OP_SHIFT_EA         2188
+OP_SHIFT_EA_CONTINUE  219C
+OP_SHIFT_IS_REGISTER  2204
+OP_SHIFT_LEFT_EA    2198
+OP_SHIFT_REG        21B0
+OP_SHIFT_REG_CONTINUE  21C4
+OP_START            1004
+OP_STOP             1B1A
+OP_SUB              1F50
+OP_SUBI             197C
+OP_SUBQ             1C7C
+OP_TRAP             1ADC
+OP_UNSUPPORTED      224E
+SIZE_B              17B4
+SIZE_L              17C0
+SIZE_W              17BA
+START               1000
