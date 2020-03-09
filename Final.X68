@@ -11,11 +11,14 @@ START:                  ; first instruction of program
 * Put program code here
     LEA $400, A0
 op_start:
+    MOVE.L A0, D3
+    JSR    int_to_ascii
+    MOVE.B #' ', (A2)+
     MOVE.L (A0), D2
-    LSR.L #8, D2
-    LSR.L #8, D2
-    LSR.L #8, D2
-    LSR.L #4, D2
+    LSR.L  #8, D2
+    LSR.L  #8, D2
+    LSR.L  #8, D2
+    LSR.L  #4, D2
     CMPI.B #0, D2
     BEQ    code0000
     CMPI.B #1, D2
@@ -1702,6 +1705,7 @@ end:
 
     SIMHALT             ; halt simulator
     END    START        ; last line of source
+
 
 
 
