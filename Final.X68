@@ -9,6 +9,19 @@
 START:                  ; first instruction of program
 
 * Put program code here
+    MOVE.B #13, D0
+    LEA    welcome_message, A1
+    TRAP   #15
+
+ui_start:
+    MOVE.B #14, D0
+    LEA    prompt_message, A0
+    TRAP   #15
+    MOVE.B #2, D0
+    LEA    ascii_start, A1
+    TRAP   #15
+    JSR    ascii_to_int
+
     LEA $400, A0
 op_start:
     MOVE.L A0, D3
@@ -48,9 +61,6 @@ op_start:
     CMPI.B  #$E, D2
     BEQ     code1110
     BRA op_unsupported
-********************************************
-*          PROGRAM COUNTER                 *
-********************************************
 
 
 ********************************************
@@ -1697,23 +1707,17 @@ itoa_character:
    ; JMP itoa_buffer
 
 
-end:
 
 * CONSTANTS
 
-* Put variables and constants here
+CR                      EQU     $0D
+LF                      EQU     $0A
+welcome_message         DC.B    'Welcome to the 68k disassembler.',CR,LF,0
+prompt_start_message    DC.B    'Enter start address: ',0
 
+end:
     SIMHALT             ; halt simulator
     END    START        ; last line of source
-
-
-
-
-
-
-
-
-
 
 *~Font name~Courier New~
 *~Font size~10~

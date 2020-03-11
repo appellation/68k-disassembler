@@ -38,15 +38,15 @@ START:
       ;CLR.B     D3          ; NEEDS SPACE
       ;ADDQ.B	#$6, D4
       ;BRA    	START		; 8bit (byte) displacement
-      OR.B      D5, D6      ; NOT WORKING
-      SUB.B     D7, D0
-      CMP.B     D1, D2
+      ;OR.B      D5, D6      ; NOT WORKING
+      ;SUB.B     D7, D0
+      ;CMP.B     D1, D2
       ;AND.B     D3, D4
-      ADD.B     D4, D5
+      ;ADD.B     D4, D5
       ;ASL.B     #4, D4      ; NEEDS SPACE
       ;ASR.B     D5, D5
-      DIVU      D1, D2
-      DIVS      D1, D2
+      ;DIVU      D1, D2
+      ;DIVS      D1, D2
 
       ;SUBI.L	#$ABCDEF12, D0
       ;MOVEA.L	D1, A2
@@ -55,8 +55,8 @@ START:
       ;MOVEM.L	(A0), D6
       ;ADDQ.L	#$5, D7
       ;OR.L      D0, D1
-      SUB.L     D2, D3
-      CMP.L     D4, D5
+      ;SUB.L     D2, D3
+      ;CMP.L     D4, D5
       ;AND.L     D6, D7
       ;ADD.L     D0, D1
       ;ADDA.L	D2, A3
@@ -78,8 +78,8 @@ START:
       ;MOVEA.L	D2, A3		  ; mode 0 and mode 1
       ;MOVE.L	(A4), D5	  ; mode 2
       ;MOVE.L	D6, (A6)	  ; mode 2
-      ;MOVEM.L	(A7)+, A7/D0  ; mode 3
-      ;MOVEM.L	D1/A6, -(A2)  ; mode 4
+      MOVEM.L	(A7)+, A7/D0  ; mode 3
+      MOVEM.L	D1/A6, -(A2)  ; mode 4
       ;MOVE.L	$ABCD, D3	  ; mode 7 subclass 0
       ;ASL	    $ABCD         ; mode 7 subclass 0 
       ;MOVE.L	D4, ($ABCDEF12).L ; mode 7 subclass 1
@@ -116,6 +116,7 @@ START:
       ;BLE	    $600
 
     END START
+
 
 
 
