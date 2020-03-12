@@ -17,18 +17,20 @@ START:                  ; first instruction of program
     TRAP   #15
 
 ui_start:
+    CLR D3
     MOVE.B #14, D0
     LEA    prompt_start_message, A1
     TRAP   #15
     MOVE.B #2, D0
     LEA    ascii_start, A1
     TRAP   #15
-    CMPI   #$0, (A1)
-    BEQ    op_unsupported
+    CMPI.B   #$0, (A1)
+    BEQ    invalid_address_start
     JSR    ascii_to_int
     MOVE  A3, D7
     ROR.B   #1, D7
-    BCS     op_unsupported
+    BCS     invalid_address_start
+ui_start_end_prompt:
     CLR D7
     MOVEA    A3, A0
     MOVE.B #14, D0
@@ -38,14 +40,14 @@ ui_start:
     LEA     ascii_start, A1
     TRAP    #15
     CMPI   #$0, (A1)
-    BEQ    op_unsupported
+    BEQ    invalid_address_end
     JSR     ascii_to_int
     MOVE  A3, D7
     ROR.B   #1, D7
-    BCS     op_unsupported
+    BCS     invalid_address_end
     CLR D7
     CMPA    A0, A3
-    BLT     op_unsupported
+    BLT     invalid_address_end
 
 op_start:
     MOVEM   D0-D7, -(A7)
@@ -141,6 +143,7 @@ ea_long_immediate:
     ADDA    #2, A0
     MOVE.L  (A0), D3
     MOVE.B  #'#', (A2)+
+    MOVE.B #'$', (A2)+
     JSR int_to_ascii
     MOVE.B  #',', (A2)+
     MOVE.B  #' ', (A2)+
@@ -153,6 +156,7 @@ ea_word_immediate:
     ADDA    #2, A0
     MOVE.W  (A0), D3
     MOVE.B  #'#', (A2)+
+    MOVE.B #'$', (A2)+
     JSR int_to_ascii
     MOVE.B  #',', (A2)+
     MOVE.B  #' ', (A2)+
@@ -269,6 +273,7 @@ ea_displacement_not_32:
     ADDI.B  #2, D4
     ADD.B   D1, D4
     MOVE.W  D4, D3
+    MOVE.B #'$', (A2)+
     JSR     int_to_ascii
     RTS
 
@@ -277,6 +282,7 @@ ea_displacement_16:
     MOVE.L  A0, D4
     ADD     (A0), D4
     MOVE.W   D4, D3
+    MOVE.B #'$', (A2)+
     JSR     int_to_ascii
     ;ADDA    #2, A0
     RTS
@@ -285,6 +291,7 @@ ea_displacement_32:
     MOVE.L  A0, D4
     ADD     (A0), D4
     MOVE.L  D4, D3
+    MOVE.B #'$', (A2)+
     JSR     int_to_ascii
     ADDA    #2, A0
     RTS
@@ -304,6 +311,7 @@ ea_mode_seven_abs_short:
     MOVE.B  #'(', (A2)+
     ADDA    #2,    A0
     MOVE.W  (A0), D3
+    MOVE.B #'$', (A2)+
     JSR int_to_ascii
     MOVE.B #')', (A2)+
     MOVE.B #'.', (A2)+
@@ -314,6 +322,7 @@ ea_mode_seven_abs_long:
     MOVE.B  #'(', (A2)+
     ADDA    #2,    A0
     MOVE.L  (A0), D3
+    MOVE.B #'$', (A2)+
     JSR int_to_ascii
     MOVE.B #')', (A2)+
     MOVE.B #'.', (A2)+
@@ -325,6 +334,7 @@ ea_mode_seven_immediate:
     ADDA    #2, A0
     MOVE.L  (A0), D3
     MOVE.B  #'#', (A2)+
+    MOVE.B #'$', (A2)+
     JSR     int_to_ascii
     ADDA    #2, A0
     RTS
@@ -1071,6 +1081,7 @@ op_trap:
     MOVE.B  #'#', (A2)+
     MOVE.W  (A0),   D3
     AND.L   #$0F,   D3
+    MOVE.B #'$', (A2)+
     JSR     int_to_ascii
     JMP     op_finish
 
@@ -1087,6 +1098,7 @@ op_stop:
     MOVE.B  #' ', (A2)+
     ADDA    #2, A0
     MOVE.W  (A0), D3
+    MOVE.B #'$', (A2)+
     JSR     int_to_ascii
     JMP     op_finish
 op_rte:
@@ -1185,6 +1197,7 @@ op_addq:
     MOVE.B  (A0), D3
     LSR     #1, D3
     ANDI    #7, D3
+    MOVE.B #'$', (A2)+
     JSR     int_to_ascii
     MOVE.B  #',', (A2)+
     MOVE.B  #' ', (A2)+
@@ -1206,6 +1219,7 @@ op_subq:
     MOVE.B  (A0), D3
     LSR     #1, D3
     ANDI    #7, D3
+    MOVE.B #'$', (A2)+
     JSR     int_to_ascii
     MOVE.B  #',', (A2)+
     MOVE.B  #' ', (A2)+
@@ -1359,6 +1373,7 @@ op_moveq:
     MOVE.B  #'#', (A2)+
     MOVE.W  (A0),  D3
     ANDI.W  #$FF,   D3
+    MOVE.B #'$', (A2)+
     JSR     int_to_ascii
     MOVE.B  #',', (A2)+
     MOVE.B  #' ', (A2)+
@@ -1666,6 +1681,7 @@ op_shift_reg_continue:
     MOVE.B  (A0), D3
     LSR.B   #1, D3
     ANDI.B  #$7, D3
+    MOVE.B #'$', (A2)+
     JSR int_to_ascii
     MOVE.B  #',', (A2)+
     MOVE.B  #' ', (A2)+
@@ -1717,16 +1733,13 @@ ui_op_finish:
     TRAP    #15
     CLR D3
     BRA op_start
-    
-op_unsupported:
-    MOVE.L A0, D3
-    ADDA    #$2, A0
-    JSR int_to_ascii
-    BRA op_finish
+********************************************
+*                 ITOA                     *
+********************************************    
+
 
 int_to_ascii:
     CLR.L   D5
-    MOVE.B #'$', (A2)+
     ;ROL.L   #1, D3
    ; BCS     itoa_negative
 ;itoa_buffer:
@@ -1753,7 +1766,9 @@ itoa_character:
     ;NOT.L    D3
    ; ADDI    #1, D3
    ; JMP itoa_buffer
-
+********************************************
+*                 ATOI                     *
+********************************************    
 ascii_to_int:
     MOVEM D0-D7, -(A7)
     CLR D6
@@ -1764,42 +1779,46 @@ ascii_to_int:
     MOVEA.L #$0, A3
     MOVE.L (A1), D5
     MOVE.B  #$1, D2
+
+    
 atoi_start:
     MOVE.B  D5, D4
     CMPI.B  #$0, D4
     BEQ     atoi_loop_continue
+    CMPI.B  #$FF, D4
+    BEQ     atoi_loop_continue
     CMPI.B  #$30, D4
-    BLT     op_unsupported
+    BLT     invalid_ascii
     CMPI.B  #$39, D4
     BLE     atoi_integer
     CMPI.B  #$41, D4
-    BLT     op_unsupported
+    BLT     invalid_ascii
     CMPI.B  #$5A, D4
     BLE     atoi_uppercase
     CMPI.B  #$61, D4
-    BLT     op_unsupported
+    BLT     invalid_ascii
     CMPI.B  #$7A, D4
     BLE     atoi_lowercase
-    BRA op_unsupported
+    BRA     invalid_ascii
     
     
 atoi_integer:
     SUBI.B  #$30, D4
     MULU.W D2, D4
     ADDA.L   D4, A3
-    MULU.W #16, D2
+    LSL.L   #4, D2
     BRA atoi_loop_continue
 atoi_uppercase:
     SUBI.B  #$41, D4
     MULU.W D2, D4
     ADDA.L   D4, A3
-    MULU.W #16, D2
+    LSL.L   #4, D2
     BRA atoi_loop_continue
 atoi_lowercase:
     SUBI.B  #$61, D4
     MULU.W D2, D4
     ADDA.L   D4, A3
-    MULU.W #16, D2
+    LSL.L   #4, D2
     BRA atoi_loop_continue
 atoi_loop_continue:
     ROR.L   #8, D5
@@ -1810,6 +1829,33 @@ atoi_loop_end:
     MOVEM (A7)+, D0-D7
     RTS
     
+********************************************
+*                 ERROR HANDLER            *
+********************************************
+
+op_unsupported:
+    MOVE.L A0, D3
+    ADDA    #$2, A0
+    JSR int_to_ascii
+    BRA op_finish
+    
+invalid_address_start:
+    LEA   invalid_address_start_message, A1
+    MOVE.B  #14, D0
+    TRAP    #15
+    BRA     ui_start
+
+invalid_address_end:
+    LEA     invalid_address_end_message, A1
+    MOVE.B  #14, D0
+    TRAP    #15
+    BRA     ui_start_end_prompt
+
+invalid_ascii:
+    LEA   invalid_ascii_message, A1
+    MOVE.B  #14, D0
+    TRAP    #15
+    BRA     ui_start
 * CONSTANTS
 
 CR                      EQU     $0D
@@ -1819,9 +1865,13 @@ prompt_start_message    DC.B    'Enter start address: ',0,0
 ascii_start             DS.B    4
 continue_page           DC.B    'Press enter to continue', CR, LF, 0
 prompt_end_message      DC.B    'Enter end address:',0,0
+invalid_address_start_message   DC.B    'Invalid address start', CR, LF, 0
+invalid_address_end_message     DC.B    'Invalid address end',  CR, LF, 0
+invalid_ascii_message       DC.B    'Invalid ASCII character(s)', CR, LF, 0
 end:
     SIMHALT             ; halt simulator
     END    START        ; last line of source
+
 
 
 *~Font name~Courier New~
