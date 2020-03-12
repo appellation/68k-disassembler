@@ -8,6 +8,9 @@
     ORG    $1000
 START:                  ; first instruction of program
 
+********************************************
+*                UI START                  *
+********************************************
 * Put program code here
     MOVE.B #13, D0
     LEA    welcome_message, A1
@@ -15,15 +18,37 @@ START:                  ; first instruction of program
 
 ui_start:
     MOVE.B #14, D0
-    LEA    prompt_message, A0
+    LEA    prompt_start_message, A1
     TRAP   #15
     MOVE.B #2, D0
     LEA    ascii_start, A1
     TRAP   #15
+    CMPI   #$0, (A1)
+    BEQ    op_unsupported
     JSR    ascii_to_int
+    MOVE  A3, D7
+    ROR.B   #1, D7
+    BCS     op_unsupported
+    CLR D7
+    MOVEA    A3, A0
+    MOVE.B #14, D0
+    LEA    prompt_end_message, A1
+    TRAP    #15
+    MOVE.B #2, D0
+    LEA     ascii_start, A1
+    TRAP    #15
+    CMPI   #$0, (A1)
+    BEQ    op_unsupported
+    JSR     ascii_to_int
+    MOVE  A3, D7
+    ROR.B   #1, D7
+    BCS     op_unsupported
+    CLR D7
+    CMPA    A0, A3
+    BLT     op_unsupported
 
-    LEA $400, A0
 op_start:
+    MOVEM   D0-D7, -(A7)
     MOVE.L A0, D3
     JSR    int_to_ascii
     MOVE.B #' ', (A2)+
@@ -1195,6 +1220,7 @@ op_bra:
     MOVE.B  #'B', (A2)+
     MOVE.B  #'R', (A2)+
     MOVE.B  #'A', (A2)+
+    MOVE.B  #' ', (A2)+
     MOVE.W  (A0),   D1
     ANDI    #$FF,   D1
     JSR     ea_displacement_start
@@ -1204,6 +1230,7 @@ op_bsr:
     MOVE.B  #'B', (A2)+
     MOVE.B  #'S', (A2)+
     MOVE.B  #'R', (A2)+
+    MOVE.B  #' ', (A2)+
     MOVE.W  (A0),   D1
     ANDI    #$F,    D1
     JSR     ea_displacement_start
@@ -1313,6 +1340,7 @@ op_bcc_size_byte:
     MOVE.B #'.', (A2)+
     MOVE.B #'B', (A2)+
 op_bcc_size_continue:
+    MOVE.B #' ', (A2)+
     MOVE.W  (A0),   D1
     ANDI    #$F,    D1
     JSR     ea_displacement_start
@@ -1671,10 +1699,30 @@ op_finish:
     TRAP #15
     MOVE.L #0, A2
     ADDA    #2, A0
-    BRA op_start
+    BRA ui_op_finish
 
+ui_op_finish:
+    
+    MOVEM (A7)+, D0-D7
+    CMPA  A0, A3
+    BLT ui_start
+    ADDI.B #1, D3
+    CMPI.B #29, D3
+    BLE op_start
+    MOVE.B #14, D0
+    LEA    continue_page, A1
+    TRAP   #15
+    MOVE.B #2, D0
+    MOVEA.L #$0, A1
+    TRAP    #15
+    CLR D3
+    BRA op_start
+    
 op_unsupported:
-    BRA end
+    MOVE.L A0, D3
+    ADDA    #$2, A0
+    JSR int_to_ascii
+    BRA op_finish
 
 int_to_ascii:
     CLR.L   D5
@@ -1706,18 +1754,75 @@ itoa_character:
    ; ADDI    #1, D3
    ; JMP itoa_buffer
 
-
-
+ascii_to_int:
+    MOVEM D0-D7, -(A7)
+    CLR D6
+    CLR D5
+    CLR D4
+    CLR D3
+    CLR D2
+    MOVEA.L #$0, A3
+    MOVE.L (A1), D5
+    MOVE.B  #$1, D2
+atoi_start:
+    MOVE.B  D5, D4
+    CMPI.B  #$0, D4
+    BEQ     atoi_loop_continue
+    CMPI.B  #$30, D4
+    BLT     op_unsupported
+    CMPI.B  #$39, D4
+    BLE     atoi_integer
+    CMPI.B  #$41, D4
+    BLT     op_unsupported
+    CMPI.B  #$5A, D4
+    BLE     atoi_uppercase
+    CMPI.B  #$61, D4
+    BLT     op_unsupported
+    CMPI.B  #$7A, D4
+    BLE     atoi_lowercase
+    BRA op_unsupported
+    
+    
+atoi_integer:
+    SUBI.B  #$30, D4
+    MULU.W D2, D4
+    ADDA.L   D4, A3
+    MULU.W #16, D2
+    BRA atoi_loop_continue
+atoi_uppercase:
+    SUBI.B  #$41, D4
+    MULU.W D2, D4
+    ADDA.L   D4, A3
+    MULU.W #16, D2
+    BRA atoi_loop_continue
+atoi_lowercase:
+    SUBI.B  #$61, D4
+    MULU.W D2, D4
+    ADDA.L   D4, A3
+    MULU.W #16, D2
+    BRA atoi_loop_continue
+atoi_loop_continue:
+    ROR.L   #8, D5
+    ADDI.B #1, D6
+    CMPI.B #4, D6  
+    BNE atoi_start
+atoi_loop_end:
+    MOVEM (A7)+, D0-D7
+    RTS
+    
 * CONSTANTS
 
 CR                      EQU     $0D
 LF                      EQU     $0A
 welcome_message         DC.B    'Welcome to the 68k disassembler.',CR,LF,0
-prompt_start_message    DC.B    'Enter start address: ',0
-
+prompt_start_message    DC.B    'Enter start address: ',0,0
+ascii_start             DS.B    4
+continue_page           DC.B    'Press enter to continue', CR, LF, 0
+prompt_end_message      DC.B    'Enter end address:',0,0
 end:
     SIMHALT             ; halt simulator
     END    START        ; last line of source
+
 
 *~Font name~Courier New~
 *~Font size~10~
